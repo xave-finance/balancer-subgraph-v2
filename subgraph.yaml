@@ -32,11 +32,12 @@ dataSources:
         - name: BToken
           file: ./abis/BToken.json
       eventHandlers:
-        # TODO move to call handler
         - event: Deposited(indexed address,indexed address,indexed address,uint128)
           handler: handleUserBalanceDeposited
         - event: Withdrawn(indexed address,indexed address,indexed address,uint128)
           handler: handleUserBalanceWithdrawn
+        - event: TokenSwap(bytes32,int256[])
+          handler: handleSwap
       callHandlers:
         - function: newPool(address,uint8)
           handler: handleNewPool

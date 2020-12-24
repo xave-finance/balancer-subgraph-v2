@@ -5,9 +5,10 @@ import {
   AddLiquidityCall,
   RemoveLiquidityCall,
   NewPoolCall,
-  SetPoolControllerCall,
+  //SetPoolControllerCall,
   BatchSwapGivenInCall,
   BatchSwapGivenOutCall,
+  TokenSwap,
 } from '../types/Vault/Vault';
 import { Balancer, Pool, PoolToken, Swap, TokenPrice, User, PoolTokenizer } from '../types/schema';
 import {
@@ -146,18 +147,34 @@ export function handleUserBalanceWithdrawn(event: Withdrawn): void {
   }
 }
 
-export function handleSetPoolController(call: SetPoolControllerCall): void {
-  const poolId = call.inputs.poolId;
-  const controller = call.inputs.controller;
-  const pool = Pool.load(poolId.toHex());
+//export function handleSetPoolController(call: SetPoolControllerCall): void {
+//const poolId = call.inputs.poolId;
+//const controller = call.inputs.controller;
+//const pool = Pool.load(poolId.toHex());
 
-  pool.controller = controller;
-  pool.save();
-}
+//pool.controller = controller;
+//pool.save();
+//}
 
 /************************************
  ************** SWAPS ***************
  ************************************/
+export function handleSwapEvent(event: TokenSwap): void {
+  const poolId = event.params.poolId;
+  const tokenDeltas = event.params.tokenDeltas;
+  const pool = Pool.load(poolId.toHexString());
+  const tokensList: Bytes[] = pool.tokensList;
+
+  for (let i: i32 = 0; i < tokensList.length; i++) {
+    const tokenAddressBytes: Bytes = tokensList[i32(i)];
+    const tokenAddress: Address = Address.fromString(tokenAddressBytes.toHexString());
+
+    const poolTokenId = getPoolTokenId(poolId.toHexString(), tokenAddress);
+    const poolToken = PoolToken.load(poolTokenId);
+
+    poolToken.balance = poolToken.balance.plus(new BigDecimal(tokenDeltas[i]));
+  }
+}
 
 export function handleBatchSwapGivenIn(call: BatchSwapGivenInCall): void {
   const swaps = call.inputs.swaps;
