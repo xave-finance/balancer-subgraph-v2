@@ -122,6 +122,12 @@
       },
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "investmentManager",
+        "type": "address"
+      },
+      {
+        "indexed": true,
         "internalType": "contract IERC20",
         "name": "token",
         "type": "address"
