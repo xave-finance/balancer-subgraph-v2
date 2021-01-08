@@ -65,18 +65,18 @@ export function createPoolTokenEntity(poolId: string, tokenAddress: Address): vo
   let name = '';
   let decimals = 18;
 
-  let symbolCall = token.try_symbol();
+  //let symbolCall = token.try_symbol();
   //let nameCall = token.try_name();
-  let decimalCall = token.try_decimals();
+  //let decimalCall = token.try_decimals();
 
-  if (symbolCall.reverted) {
+  //if (symbolCall.reverted) {
     //const symbolBytesCall = tokenBytes.try_symbol();
     //if (!symbolBytesCall.reverted) {
     //symbol = symbolBytesCall.value.toString();
     //}
-  } else {
-    symbol = symbolCall.value;
-  }
+  //} else {
+    //symbol = symbolCall.value;
+  //}
 
   //if (nameCall.reverted) {
     ////const nameBytesCall = tokenBytes.try_name();
@@ -87,9 +87,9 @@ export function createPoolTokenEntity(poolId: string, tokenAddress: Address): vo
     //name = nameCall.value;
   //}
 
-  if (!decimalCall.reverted) {
-    decimals = decimalCall.value;
-  }
+  //if (!decimalCall.reverted) {
+    //decimals = decimalCall.value;
+  //}
 
   let poolToken = new PoolToken(poolTokenId);
   poolToken.poolId = poolId;
@@ -98,6 +98,7 @@ export function createPoolTokenEntity(poolId: string, tokenAddress: Address): vo
   poolToken.symbol = symbol;
   poolToken.decimals = decimals;
   poolToken.balance = ZERO_BD;
+  poolToken.invested = ZERO_BD;
   poolToken.save();
 }
 
@@ -191,7 +192,7 @@ export function updatePoolLiquidity(id: string): void {
 }
 
 export function decrPoolCount(finalized: boolean): void {
-  const factory = Balancer.load('1');
+  const factory = Balancer.load('2');
   factory.poolCount -= 1;
   if (finalized) factory.finalizedPoolCount -= 1;
   factory.save();
