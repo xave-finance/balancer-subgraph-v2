@@ -31,6 +31,7 @@ type Pool @entity {
     vaultID: Balancer!
     tx: Bytes                                           # Pool creation transaction id
     swaps: [Swap!] @derivedFrom(field: "poolId")
+    poolTokenizer: PoolTokenizer
 }
 
 type PoolToken @entity {
@@ -85,6 +86,7 @@ type Swap @entity {
     tokenOutSym: String!
     tokenAmountIn: BigDecimal!
     tokenAmountOut: BigDecimal!
+    tokenDeltas: [BigInt!]!
     poolId: Pool!
     userAddress: User!                      # User address that initiates the swap
     value: BigDecimal!                      # Swap value in USD

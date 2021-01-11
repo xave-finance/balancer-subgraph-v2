@@ -75,18 +75,19 @@ export function handleNewPool(call: NewPoolCall): void {
 
 export function handleAddLiquidity(call: AddLiquidityCall): void {
   let poolId = call.inputs.poolId.toHex();
+  let tokenAddresses = call.inputs.tokens;
+  let amounts = call.inputs.amounts;
+
   let pool = Pool.load(poolId);
   let tokensList = pool.tokensList || [];
 
   let poolTokenizer = PoolTokenizer.load(pool.controller.toHex());
   poolTokenizer.joinsCount = poolTokenizer.joinsCount.plus(BigInt.fromI32(1));
-  let tokenAddresses = call.inputs.tokens;
-  let amounts = call.inputs.amounts;
   for (let i: i32 = 0; i < tokenAddresses.length; i++) {
     let tokenAddress = tokenAddresses[i];
     let poolTokenId = getPoolTokenId(poolId, tokenAddress);
     let poolToken = PoolToken.load(poolTokenId);
-    //// adding initial liquidity
+    // adding initial liquidity
     if (poolToken == null) {
       if (tokensList.indexOf(tokenAddress) == -1) {
         tokensList.push(tokenAddress);
@@ -136,10 +137,13 @@ export function handleUserBalanceDeposited(event: Deposited): void {
 
   if (userBalance == null) {
     userBalance = new UserBalance(userBalanceId);
+    userBalance.userAddress = event.params.user.toHexString();
+    userBalance.token = event.params.token;
+    userBalance.balance = ZERO_BD;
   }
-  userBalance.balance = ZERO_BD; // TODO
-  userBalance.token = event.params.token;
-  //userBalance.balance = userBalance.balance + new BigDecimal(event.params.amount);
+  // TODO tokenToDeciml - amount is a BigInt
+  let tokenAmount: BigDecimal = event.params.amount.toBigDecimal();
+  userBalance.balance = userBalance.balance.plus(tokenAmount);
   userBalance.save();
 }
 
@@ -150,10 +154,13 @@ export function handleUserBalanceWithdrawn(event: Withdrawn): void {
   if (userBalance == null) {
     // this should never happen since balances must be > 0
     userBalance = new UserBalance(userBalanceId);
+    userBalance.userAddress = event.params.user.toHexString();
+    userBalance.token = event.params.token;
+    userBalance.balance = ZERO_BD;
   }
-  userBalance.balance = ZERO_BD // TODO
-  userBalance.token = event.params.token;
-  //userBalance.balance = userBalance.balance - new BigDecimal(event.params.amount);
+  // TODO tokenToDeciml
+  let tokenAmount: BigDecimal = event.params.amount.toBigDecimal();
+  userBalance.balance = userBalance.balance.minus(tokenAmount);
   userBalance.save();
 }
 
@@ -169,7 +176,10 @@ export function handleInvestment(event: PoolInvested): void {
   let pool = Pool.load(poolId.toHexString());
   let poolTokenId = getPoolTokenId(poolId.toHexString(), token);
   let poolToken = PoolToken.load(poolTokenId);
-  poolToken.invested += amount.toBigDecimal();
+
+  // TODO tokenToDeciml
+  let tokenAmount: BigDecimal = amount.toBigDecimal()
+  poolToken.invested = poolToken.invested.plus(tokenAmount);
   poolToken.save();
 
 
@@ -186,7 +196,7 @@ export function handleInvestment(event: PoolInvested): void {
  ************************************/
 export function handleSwapEvent(event: TokenSwap): void {
   let poolId = event.params.poolId;
-  let tokenDeltas = event.params.tokenDeltas;
+  let tokenDeltas: BigInt[] = event.params.tokenDeltas;
   let pool = Pool.load(poolId.toHexString());
   let tokensList: Bytes[] = pool.tokensList;
 
@@ -230,6 +240,8 @@ export function handleSwapEvent(event: TokenSwap): void {
   swap.tokenOutSym = tokenOutSym;
   swap.tokenAmountOut = new BigDecimal(tokenAmountOut);
 
+  swap.tokenDeltas = tokenDeltas;
+
   swap.caller = event.transaction.from;
   swap.userAddress = event.transaction.from.toHex();
   swap.poolId = poolId.toHex();
@@ -252,11 +264,11 @@ export function handleBatchSwapGivenIn(call: BatchSwapGivenInCall): void {
 
   for (let i: i32 = 0; i < swaps.length; i++) {
     //struct SwapInternal {
-    //bytes32 poolId;
-    //uint128 tokenInIndex;
-    //uint128 tokenOutIndex;
-    //uint128 amount; // amountIn, amountOut
-    //bytes userData;
+    //  bytes32 poolId;
+    //  uint128 tokenInIndex;
+    //  uint128 tokenOutIndex;
+    //  uint128 amount; // amountIn, amountOut
+    //  bytes userData;
     //}
     let swapStruct = swaps[i];
     let poolId = swapStruct.poolId;
@@ -291,7 +303,7 @@ export function handleBatchSwapGivenIn(call: BatchSwapGivenInCall): void {
     swap.save();
 
     let pool = Pool.load(poolId.toHex());
-    pool.swapsCount = pool.swapsCount + BigInt.fromI32(1);
+    pool.swapsCount = pool.swapsCount.plus(BigInt.fromI32(1));
     pool.save();
   }
 }
@@ -341,7 +353,7 @@ export function handleBatchSwapGivenOut(call: BatchSwapGivenOutCall): void {
     swap.save();
 
     let pool = Pool.load(poolId.toHex());
-    pool.swapsCount = pool.swapsCount + BigInt.fromI32(1);
+    pool.swapsCount = pool.swapsCount.plus(BigInt.fromI32(1));
     pool.save();
   }
 }
