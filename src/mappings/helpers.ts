@@ -1,5 +1,5 @@
 import { BigDecimal, Address, BigInt, Bytes, dataSource, ethereum } from '@graphprotocol/graph-ts';
-import { Pool, User, PoolToken, PoolShare, TokenPrice, PoolTransaction, Balancer } from '../types/schema';
+import { Pool, User, PoolToken, PoolShare, TokenPrice, Balancer } from '../types/schema';
 import { ERC20 } from '../types/templates/ERC20/ERC20';
 
 export let ZERO_BD = BigDecimal.fromString('0');
@@ -196,26 +196,6 @@ export function decrPoolCount(finalized: boolean): void {
   factory.poolCount -= 1;
   if (finalized) factory.finalizedPoolCount -= 1;
   factory.save();
-}
-
-export function saveTransaction(event: ethereum.Event, eventName: string): void {
-  const tx = event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toString());
-  const userAddress = event.transaction.from.toHex();
-  let transaction = PoolTransaction.load(tx);
-  if (transaction == null) {
-    transaction = new PoolTransaction(tx);
-  }
-  transaction.event = eventName;
-  transaction.poolAddress = event.address.toHex();
-  transaction.userAddress = userAddress;
-  transaction.gasUsed = event.transaction.gasUsed.toBigDecimal();
-  transaction.gasPrice = event.transaction.gasPrice.toBigDecimal();
-  transaction.tx = event.transaction.hash;
-  transaction.timestamp = event.block.timestamp.toI32();
-  transaction.block = event.block.number.toI32();
-  transaction.save();
-
-  createUserEntity(Address.fromString(userAddress));
 }
 
 export function createUserEntity(address: Address): void {

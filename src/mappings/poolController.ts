@@ -8,7 +8,6 @@ import {
   createPoolShareEntity,
   createPoolTokenEntity,
   updatePoolLiquidity,
-  saveTransaction,
   ZERO_BD,
   decrPoolCount,
 } from './helpers';
