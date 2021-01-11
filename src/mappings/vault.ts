@@ -11,7 +11,7 @@ import {
   TokenSwap,
   PoolInvested,
 } from '../types/Vault/Vault';
-import { Balancer, Pool, PoolToken, Swap, TokenPrice, User, PoolTokenizer, Investment } from '../types/schema';
+import { Balancer, Pool, PoolToken, Swap, TokenPrice, User, UserBalance, PoolTokenizer, Investment } from '../types/schema';
 import {
   hexToDecimal,
   tokenToDecimal,
@@ -131,25 +131,36 @@ export function handleRemoveLiquidity(call: RemoveLiquidityCall): void {
 }
 
 export function handleUserBalanceDeposited(event: Deposited): void {
-  let user = User.load(event.params.user.toString());
-  if (user == null) {
-    user = new User(event.params.user.toString());
-    user.save();
+  let userBalanceId: string = event.params.user.toHexString() + event.params.token.toHexString()
+  let userBalance = UserBalance.load(userBalanceId);
+
+  if (userBalance == null) {
+    userBalance = new UserBalance(userBalanceId);
   }
+  userBalance.balance = ZERO_BD; // TODO
+  userBalance.token = event.params.token;
+  //userBalance.balance = userBalance.balance + new BigDecimal(event.params.amount);
+  userBalance.save();
 }
 
 export function handleUserBalanceWithdrawn(event: Withdrawn): void {
-  let user = User.load(event.params.user.toString());
-  if (user == null) {
-    user = new User(event.params.user.toString());
-    user.save();
+  let userBalanceId: string = event.params.user.toHexString() + event.params.token.toHexString()
+  let userBalance = UserBalance.load(userBalanceId);
+
+  if (userBalance == null) {
+    // this should never happen since balances must be > 0
+    userBalance = new UserBalance(userBalanceId);
   }
+  userBalance.balance = ZERO_BD // TODO
+  userBalance.token = event.params.token;
+  //userBalance.balance = userBalance.balance - new BigDecimal(event.params.amount);
+  userBalance.save();
 }
 
 /************************************
  ********** INVESTMENTS *************
  ************************************/
-export function handleInvestmentEvent(event: PoolInvested): void {
+export function handleInvestment(event: PoolInvested): void {
   let poolId = event.params.poolId;
   let token: Address = event.params.token;
   let investmentManagerAddress: Address = event.params.investmentManager;
