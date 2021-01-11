@@ -69,7 +69,16 @@ type User @entity {
     sharesOwned: [PoolShare!]  @derivedFrom(field: "userAddress")
     txs: [PoolTransaction!]  @derivedFrom(field: "userAddress")
     swaps: [Swap!]  @derivedFrom(field: "userAddress")
+    userBalances: [UserBalance!]  @derivedFrom(field: "userAddress")
 }
+
+type UserBalance @entity {
+  id:  ID!
+  userAddress: User
+  token: Bytes!
+  balance: BigDecimal!
+}
+
 
 type Swap @entity {
     id: ID!                                 #

@@ -65,31 +65,31 @@ export function createPoolTokenEntity(poolId: string, tokenAddress: Address): vo
   let name = '';
   let decimals = 18;
 
-  //let symbolCall = token.try_symbol();
-  //let nameCall = token.try_name();
-  //let decimalCall = token.try_decimals();
+  let symbolCall = token.try_symbol();
+  let nameCall = token.try_name();
+  let decimalCall = token.try_decimals();
 
-  //if (symbolCall.reverted) {
+  if (symbolCall.reverted) {
+    // TODO
     //const symbolBytesCall = tokenBytes.try_symbol();
     //if (!symbolBytesCall.reverted) {
     //symbol = symbolBytesCall.value.toString();
+  } else {
+    symbol = symbolCall.value;
+  }
+
+  if (nameCall.reverted) {
+    //const nameBytesCall = tokenBytes.try_name();
+    //if (!nameBytesCall.reverted) {
+    //name = nameBytesCall.value.toString();
     //}
-  //} else {
-    //symbol = symbolCall.value;
-  //}
+  } else {
+    name = nameCall.value;
+  }
 
-  //if (nameCall.reverted) {
-    ////const nameBytesCall = tokenBytes.try_name();
-    ////if (!nameBytesCall.reverted) {
-    ////name = nameBytesCall.value.toString();
-    ////}
-  //} else {
-    //name = nameCall.value;
-  //}
-
-  //if (!decimalCall.reverted) {
-    //decimals = decimalCall.value;
-  //}
+  if (!decimalCall.reverted) {
+    decimals = decimalCall.value;
+  }
 
   let poolToken = new PoolToken(poolTokenId);
   poolToken.poolId = poolId;
