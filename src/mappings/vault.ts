@@ -136,10 +136,13 @@ export function handleUserBalanceDeposited(event: Deposited): void {
 
   if (userBalance == null) {
     userBalance = new UserBalance(userBalanceId);
+    userBalance.userAddress = event.params.user.toHexString();
+    userBalance.token = event.params.token;
+    userBalance.balance = ZERO_BD;
   }
-  userBalance.balance = ZERO_BD; // TODO
-  userBalance.token = event.params.token;
-  //userBalance.balance = userBalance.balance + new BigDecimal(event.params.amount);
+  // TODO tokenToDeciml - amount is a BigInt
+  let tokenAmount: BigDecimal = event.params.amount.toBigDecimal();
+  userBalance.balance = userBalance.balance.plus(tokenAmount);
   userBalance.save();
 }
 
@@ -150,10 +153,13 @@ export function handleUserBalanceWithdrawn(event: Withdrawn): void {
   if (userBalance == null) {
     // this should never happen since balances must be > 0
     userBalance = new UserBalance(userBalanceId);
+    userBalance.userAddress = event.params.user.toHexString();
+    userBalance.token = event.params.token;
+    userBalance.balance = ZERO_BD;
   }
-  userBalance.balance = ZERO_BD // TODO
-  userBalance.token = event.params.token;
-  //userBalance.balance = userBalance.balance - new BigDecimal(event.params.amount);
+  // TODO tokenToDeciml
+  let tokenAmount: BigDecimal = event.params.amount.toBigDecimal();
+  userBalance.balance = userBalance.balance.minus(tokenAmount);
   userBalance.save();
 }
 
@@ -169,7 +175,10 @@ export function handleInvestment(event: PoolInvested): void {
   let pool = Pool.load(poolId.toHexString());
   let poolTokenId = getPoolTokenId(poolId.toHexString(), token);
   let poolToken = PoolToken.load(poolTokenId);
-  poolToken.invested += amount.toBigDecimal();
+
+  // TODO tokenToDeciml
+  let tokenAmount: BigDecimal = amount.toBigDecimal()
+  poolToken.invested = poolToken.invested.plus(tokenAmount);
   poolToken.save();
 
 
@@ -252,11 +261,11 @@ export function handleBatchSwapGivenIn(call: BatchSwapGivenInCall): void {
 
   for (let i: i32 = 0; i < swaps.length; i++) {
     //struct SwapInternal {
-    //bytes32 poolId;
-    //uint128 tokenInIndex;
-    //uint128 tokenOutIndex;
-    //uint128 amount; // amountIn, amountOut
-    //bytes userData;
+    //  bytes32 poolId;
+    //  uint128 tokenInIndex;
+    //  uint128 tokenOutIndex;
+    //  uint128 amount; // amountIn, amountOut
+    //  bytes userData;
     //}
     let swapStruct = swaps[i];
     let poolId = swapStruct.poolId;
@@ -291,7 +300,7 @@ export function handleBatchSwapGivenIn(call: BatchSwapGivenInCall): void {
     swap.save();
 
     let pool = Pool.load(poolId.toHex());
-    pool.swapsCount = pool.swapsCount + BigInt.fromI32(1);
+    pool.swapsCount = pool.swapsCount.plus(BigInt.fromI32(1));
     pool.save();
   }
 }
@@ -341,7 +350,7 @@ export function handleBatchSwapGivenOut(call: BatchSwapGivenOutCall): void {
     swap.save();
 
     let pool = Pool.load(poolId.toHex());
-    pool.swapsCount = pool.swapsCount + BigInt.fromI32(1);
+    pool.swapsCount = pool.swapsCount.plus(BigInt.fromI32(1));
     pool.save();
   }
 }
