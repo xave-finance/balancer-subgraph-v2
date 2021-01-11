@@ -75,18 +75,19 @@ export function handleNewPool(call: NewPoolCall): void {
 
 export function handleAddLiquidity(call: AddLiquidityCall): void {
   let poolId = call.inputs.poolId.toHex();
+  let tokenAddresses = call.inputs.tokens;
+  let amounts = call.inputs.amounts;
+
   let pool = Pool.load(poolId);
   let tokensList = pool.tokensList || [];
 
   let poolTokenizer = PoolTokenizer.load(pool.controller.toHex());
   poolTokenizer.joinsCount = poolTokenizer.joinsCount.plus(BigInt.fromI32(1));
-  let tokenAddresses = call.inputs.tokens;
-  let amounts = call.inputs.amounts;
   for (let i: i32 = 0; i < tokenAddresses.length; i++) {
     let tokenAddress = tokenAddresses[i];
     let poolTokenId = getPoolTokenId(poolId, tokenAddress);
     let poolToken = PoolToken.load(poolTokenId);
-    //// adding initial liquidity
+    // adding initial liquidity
     if (poolToken == null) {
       if (tokensList.indexOf(tokenAddress) == -1) {
         tokensList.push(tokenAddress);
@@ -195,7 +196,7 @@ export function handleInvestment(event: PoolInvested): void {
  ************************************/
 export function handleSwapEvent(event: TokenSwap): void {
   let poolId = event.params.poolId;
-  let tokenDeltas = event.params.tokenDeltas;
+  let tokenDeltas: BigInt[] = event.params.tokenDeltas;
   let pool = Pool.load(poolId.toHexString());
   let tokensList: Bytes[] = pool.tokensList;
 
@@ -238,6 +239,8 @@ export function handleSwapEvent(event: TokenSwap): void {
   swap.tokenOut = tokenOutAddress;
   swap.tokenOutSym = tokenOutSym;
   swap.tokenAmountOut = new BigDecimal(tokenAmountOut);
+
+  swap.tokenDeltas = tokenDeltas;
 
   swap.caller = event.transaction.from;
   swap.userAddress = event.transaction.from.toHex();
