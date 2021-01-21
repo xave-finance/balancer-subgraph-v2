@@ -26,31 +26,51 @@ dataSources:
         - name: ERC20
           file: ./abis/ERC20.json
       eventHandlers:
-        - event: Deposited(indexed address,indexed address,indexed address,uint128)
+        - event: Deposited(indexed address,indexed address,indexed address,uint256)
           handler: handleUserBalanceDeposited
-        - event: Withdrawn(indexed address,indexed address,indexed address,uint128)
+        - event: Withdrawn(indexed address,indexed address,indexed address,uint256)
           handler: handleUserBalanceWithdrawn
-        - event: TokenSwap(bytes32,int256[])
+        - event: TokenSwap(indexed bytes32,indexed address,indexed address,int256,int256)
           handler: handleSwapEvent
         - event: PoolInvested(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleInvestment
       callHandlers:
-        - function: newPool(address,uint8)
-          handler: handleNewPool
-        - function: addLiquidity(bytes32,address,address[],uint128[],bool)
+        #- function: newPool(address,uint8)
+          #handler: handleNewPool
+        - function: addLiquidity(bytes32,address,address[],uint256[],bool)
           handler: handleAddLiquidity
-        - function: removeLiquidity(bytes32,address,address[],uint128[],bool)
+        - function: removeLiquidity(bytes32,address,address[],uint256[],bool)
           handler: handleRemoveLiquidity
         #- function: batchSwapGivenIn(address,bytes,tuple[],address[],tuple)
           #handler: handleBatchSwapGivenIn
         #- function: batchSwapGivenOut(address,bytes,tuple[],address[],tuple)
           #handler: handleBatchSwapGivenOut
+  - kind: ethereum/contract
+    name: PoolFactory
+    network: dev
+    source:
+      address: "0xe1A83F0B4Efb1bf9047656faC028B8455bed3661"
+      abi: WeightedPoolFactory
+      startBlock: 1
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/poolFactory.ts
+      entities:
+        - Balancer
+      abis:
+        - name: WeightedPoolFactory
+          file: ./abis/BasePoolFactory.json
+      eventHandlers:
+        - event: PoolCreated(indexed address)
+          handler: handleNewPool
 templates:
   - kind: ethereum/contract
     name: Pool
     network: dev
     source:
-      abi: ConstantProductPool
+      abi: WeightedPool
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -59,11 +79,12 @@ templates:
       entities:
         - FixedSetPoolTokenizer
         - BToken
+        - WeightedPool
       abis:
-        - name: ConstantProductPool
-          file: ./abis/ConstantProductPool.json
-        - name: StablecoinPool
-          file: ./abis/StablecoinPool.json
+        - name: WeightedPool
+          file: ./abis/WeightedPool.json
+        - name: StablePool
+          file: ./abis/StablePool.json
         - name: BToken
           file: ./abis/BToken.json
       eventHandlers:
