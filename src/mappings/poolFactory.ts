@@ -5,13 +5,14 @@ import {
 import { BigInt, BigDecimal, Address, Bytes, store } from '@graphprotocol/graph-ts';
 import {
   PoolCreated
-} from '../types/PoolFactory/WeightedPoolFactory';
+} from '../types/WeightedPoolFactory/WeightedPoolFactory';
 import { Balancer, Pool, PoolToken, Swap, TokenPrice, User, UserBalance, PoolTokenizer, Investment } from '../types/schema';
 
-import { WeightedPool } from '../types/templates/Pool/WeightedPool'
-import { Pool as PoolTemplate } from '../types/templates'
+// datasource
+import { WeightedPool as WeightedPoolTemplate } from '../types/templates'
+import { StablePool as StablePoolTemplate } from '../types/templates'
 
-//import { WeightedPool as WeightedPoolTemplate } from '../types/templates/'
+import { WeightedPool } from '../types/templates/WeightedPool/WeightedPool'
 
 export function handleNewPool(event: PoolCreated): void {
   let vault = Balancer.load('2');
@@ -67,7 +68,7 @@ export function handleNewPool(event: PoolCreated): void {
 
 
   // start receiving events
-  PoolTemplate.create(poolAddress);
+  WeightedPoolTemplate.create(poolAddress);
 }
 
 
