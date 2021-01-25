@@ -7,8 +7,8 @@ import {
   //SetPoolControllerCall,
   BatchSwapGivenInCall,
   BatchSwapGivenOutCall,
-  TokenSwap,
-  PoolInvested,
+  Swap as SwapEvent,
+  PoolBalanceChanged,
 } from '../types/Vault/Vault';
 import { Balancer, Pool, PoolToken, Swap, TokenPrice, User, UserBalance, PoolTokenizer, Investment } from '../types/schema';
 import {
@@ -125,10 +125,10 @@ export function handleUserBalanceWithdrawn(event: Withdrawn): void {
 /************************************
  ********** INVESTMENTS *************
  ************************************/
-export function handleInvestment(event: PoolInvested): void {
+export function handleInvestment(event: PoolBalanceChanged): void {
   let poolId = event.params.poolId;
   let token: Address = event.params.token;
-  let investmentManagerAddress: Address = event.params.investmentManager;
+  let investmentManagerAddress: Address = event.params.assetManager;
   let amount = event.params.amount;
 
   let pool = Pool.load(poolId.toHexString());
@@ -152,7 +152,7 @@ export function handleInvestment(event: PoolInvested): void {
 /************************************
  ************** SWAPS ***************
  ************************************/
-export function handleSwapEvent(event: TokenSwap): void {
+export function handleSwapEvent(event: SwapEvent): void {
   let poolId = event.params.poolId;
   //let tokenDeltas: BigInt[] = event.params.tokenDeltas;
   let pool = Pool.load(poolId.toHexString());

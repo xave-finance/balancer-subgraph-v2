@@ -8,7 +8,7 @@ dataSources:
     name: Vault 
     network: dev
     source:
-      address: "0xEB3614970eF01b35f656040777CE5D91BA9e659B"
+      address: "0xFD6cCCa2D6fbc8bc3b89eCcf63AbE43368D63Eb3"
       abi: Vault
       startBlock: 1
     mapping:
@@ -21,14 +21,16 @@ dataSources:
       abis:
         - name: Vault
           file: ./abis/Vault.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Deposited(indexed address,indexed address,indexed address,uint256)
           handler: handleUserBalanceDeposited
         - event: Withdrawn(indexed address,indexed address,indexed address,uint256)
           handler: handleUserBalanceWithdrawn
-        - event: TokenSwap(indexed bytes32,indexed address,indexed address,int256,int256)
+        - event: Swap(indexed bytes32,indexed address,indexed address,uint256,uint256)
           handler: handleSwapEvent
-        - event: PoolInvested(indexed bytes32,indexed address,indexed address,uint256)
+        - event: PoolBalanceChanged(indexed bytes32,indexed address,indexed address,int256)
           handler: handleInvestment
       callHandlers:
         - function: addLiquidity(bytes32,address,address[],uint256[],bool)
@@ -45,7 +47,7 @@ dataSources:
     name: WeightedPoolFactory
     network: dev
     source:
-      address: "0xe1A83F0B4Efb1bf9047656faC028B8455bed3661"
+      address: "0xf8c801AB37b7Dc407b16a1748403942c455fAfE9"
       abi: WeightedPoolFactory
       startBlock: 1
     mapping:
@@ -68,7 +70,7 @@ dataSources:
     name: StablePoolFactory
     network: dev
     source:
-      address: "0xfA9e8BE4C8A5E6b81E933FF563A4E53793ae9C55"
+      address: "0x31c099FF2e1412038B80Ea29E55C135d9C7144bb"
       abi: StablePoolFactory
       startBlock: 1
     mapping:

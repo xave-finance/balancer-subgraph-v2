@@ -101,32 +101,6 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "_poolId",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_vault",
-    "outputs": [
-      {
-        "internalType": "contract IVault",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -171,24 +145,6 @@
         "type": "bool"
       }
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "assetManager",
-        "type": "address"
-      }
-    ],
-    "name": "authorizeAssetManager",
-    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
