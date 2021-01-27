@@ -8,7 +8,7 @@ dataSources:
     name: Vault 
     network: dev
     source:
-      address: "0xA92b0e957B6FF4F607c73FeC2F2Afa6e2eB193F6"
+      address: "0xFf300A4Be092d00efBB146A6DA9807235D4652f7"
       abi: Vault
       startBlock: 1
     mapping:
@@ -34,9 +34,11 @@ dataSources:
           handler: handleInvestment
         - event: TokensRegistered(bytes32,address[])
           handler: handleTokensRegistered
+        - event: PoolJoined(indexed bytes32,indexed address,uint256[],uint256[])
+          handler: handlePoolJoined
+        - event: PoolExited(indexed bytes32,indexed address,uint256[],uint256[])
+          handler: handlePoolExited
       #callHandlers:
-        #- function: addLiquidity(bytes32,address,address[],uint256[],bool)
-          #handler: handleAddLiquidity
         #- function: removeLiquidity(bytes32,address,address[],uint256[],bool)
           #handler: handleRemoveLiquidity
         #- function: newPool(address,uint8)
@@ -49,7 +51,7 @@ dataSources:
     name: WeightedPoolFactory
     network: dev
     source:
-      address: "0x2356b79126252beF711B2C058B1E7d70F27efe7B"
+      address: "0x0Dd3c06a4AB9Ed075d21cb8F9DB91062a4ac1374"
       abi: WeightedPoolFactory
       startBlock: 1
     mapping:
@@ -72,7 +74,7 @@ dataSources:
     name: StablePoolFactory
     network: dev
     source:
-      address: "0xfd42310276d233Fe13D25946D7AD3e35Cd6c6e00"
+      address: "0xc14011D5f9b0e1f3d4742c1CA7b4AB566Fc7CA88"
       abi: StablePoolFactory
       startBlock: 1
     mapping:

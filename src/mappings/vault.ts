@@ -3,6 +3,8 @@ import {
   InternalBalanceDeposited,
   InternalBalanceWithdrawn,
   //JoinPool,
+  PoolJoined,
+  PoolExited,
   TokensRegistered,
   //AddLiquidityCall,
   //RemoveLiquidityCall,
@@ -69,38 +71,63 @@ export function handleTokensRegistered(event: TokensRegistered): void {
   pool.save();
 }
 
-//export function handleAddLiquidity(call: AddLiquidityCall): void {
-//let poolId = call.inputs.poolId.toHex();
-//let tokenAddresses = call.inputs.tokens;
-//let amounts = call.inputs.amounts;
+export function handlePoolJoined(event: PoolJoined): void {
+  let poolId = event.params.poolId.toHex();
+  let amounts = event.params.amountsIn;
 
-//let pool = Pool.load(poolId);
-//let tokensList = pool.tokensList || [];
+  let pool = Pool.load(poolId);
+  let tokensList = pool.tokensList || [];
 
-//let poolTokenizer = PoolTokenizer.load(pool.controller.toHex());
-//poolTokenizer.joinsCount = poolTokenizer.joinsCount.plus(BigInt.fromI32(1));
-//for (let i: i32 = 0; i < tokenAddresses.length; i++) {
-//let tokenAddress = tokenAddresses[i];
-//let poolTokenId = getPoolTokenId(poolId, tokenAddress);
-//let poolToken = PoolToken.load(poolTokenId);
-//// adding initial liquidity
-//if (poolToken == null) {
-//if (tokensList.indexOf(tokenAddress) == -1) {
-//tokensList.push(tokenAddress);
-//}
-//createPoolTokenEntity(poolId, tokenAddress);
-//poolToken = PoolToken.load(poolTokenId);
-//}
-//let tokenAmountIn = tokenToDecimal(amounts[i], poolToken.decimals);
-//let newAmount = poolToken.balance.plus(tokenAmountIn);
-//poolToken.balance = newAmount;
-//poolToken.save();
-//}
-//pool.tokensList = tokensList;
-//pool.save();
-//poolTokenizer.save();
-////updatePoolLiquidity(poolId);
-//}
+  let tokenAddresses = pool.tokensList;
+
+  //let poolTokenizer = PoolTokenizer.load(pool.controller.toHex());
+  //poolTokenizer.joinsCount = poolTokenizer.joinsCount.plus(BigInt.fromI32(1));
+  //poolTokenizer.save();
+
+  for (let i: i32 = 0; i < tokenAddresses.length; i++) {
+    let tokenAddress: Address = Address.fromString(tokenAddresses[i].toHexString());
+    let poolTokenId = getPoolTokenId(poolId, tokenAddress);
+    let poolToken = PoolToken.load(poolTokenId);
+    // adding initial liquidity
+    if (poolToken == null) {
+      throw new Error('poolToken not found');
+    }
+    let tokenAmountIn = tokenToDecimal(amounts[i], poolToken.decimals);
+    let newAmount = poolToken.balance.plus(tokenAmountIn);
+    poolToken.balance = newAmount;
+    poolToken.save();
+  }
+  //updatePoolLiquidity(poolId);
+}
+
+export function handlePoolExited(event: PoolExited): void {
+  let poolId = event.params.poolId.toHex();
+  let amounts = event.params.amountsOut;
+
+  let pool = Pool.load(poolId);
+  let tokensList = pool.tokensList || [];
+
+  let tokenAddresses = pool.tokensList;
+
+  let poolTokenizer = PoolTokenizer.load(pool.controller.toHex());
+  poolTokenizer.exitsCount = poolTokenizer.exitsCount.plus(BigInt.fromI32(1));
+  poolTokenizer.save();
+
+  for (let i: i32 = 0; i < tokenAddresses.length; i++) {
+    let tokenAddress: Address = Address.fromString(tokenAddresses[i].toHexString());
+    let poolTokenId = getPoolTokenId(poolId, tokenAddress);
+    let poolToken = PoolToken.load(poolTokenId);
+    // adding initial liquidity
+    if (poolToken == null) {
+      throw new Error('poolToken not found');
+    }
+    let tokenAmountOut = tokenToDecimal(amounts[i], poolToken.decimals);
+    let newAmount = poolToken.balance.plus(tokenAmountOut);
+    poolToken.balance = newAmount;
+    poolToken.save();
+  }
+  //updatePoolLiquidity(poolId);
+}
 
 //export function handleRemoveLiquidity(call: RemoveLiquidityCall): void {
 //let poolId = call.inputs.poolId.toHex();
