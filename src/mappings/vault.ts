@@ -14,6 +14,9 @@ import {
   Swap as SwapEvent,
   PoolBalanceChanged,
 } from '../types/Vault/Vault';
+import { Vault } from '../types/Vault/Vault'
+import { WeightedPool } from '../types/templates/WeightedPool/WeightedPool'
+import { WeightedPool as WeightedPoolTemplate } from '../types/templates'
 import {
   Balancer,
   Pool,
@@ -38,31 +41,44 @@ import {
 import { ZERO_BD, WETH, WBTC, USD, USDC, DAI, BAL } from './constants';
 
 export function handleTokensRegistered(event: TokensRegistered): void {
-  let poolId: string = event.params.poolId.toHexString();
+  let poolId: Bytes = event.params.poolId;
   let tokenAddresses: Address[] = event.params.tokens;
 
-  let pool = Pool.load(poolId)
+  let pool = Pool.load(poolId.toHexString())
   if (pool === null) {
-    pool = newPoolEntity(poolId);
+    pool = newPoolEntity(poolId.toHexString());
 
-    pool.swapFee = ZERO_BD;
+    let vaultContract = Vault.bind(event.address);
+
+    let poolDetails = vaultContract.try_getPool(poolId);
+    let poolAddress: Address = poolDetails.value.value0;
+
+    let poolContract = WeightedPool.bind(poolAddress);
+
+    let swapFeeCall = poolContract.try_getSwapFee();
+    let swapFee = swapFeeCall.value;
+    pool.swapFee = swapFee.toBigDecimal();
     pool.createTime = event.block.timestamp.toI32();
-    //TODO
-    pool.controller = event.transaction.from;
+    // load pool address from vault
+
+    pool.controller = poolAddress;
     pool.tx = event.transaction.hash;
+
+    // start receiving events
+    WeightedPoolTemplate.create(poolAddress);
   }
 
   let tokensList: Bytes[] = pool.tokensList || [];
 
   for (let i: i32 = 0; i < tokenAddresses.length; i++) {
     let tokenAddress = tokenAddresses[i];
-    let poolTokenId = getPoolTokenId(poolId, tokenAddress);
+    let poolTokenId = getPoolTokenId(poolId.toHexString(), tokenAddress);
     let poolToken = PoolToken.load(poolTokenId);
     if (poolToken == null) {
       if (tokensList.indexOf(tokenAddress) == -1) {
         tokensList.push(tokenAddress);
       }
-      createPoolTokenEntity(poolId, tokenAddress);
+      createPoolTokenEntity(poolId.toHexString(), tokenAddress);
       poolToken = PoolToken.load(poolTokenId);
       poolToken.save();
     }
@@ -72,7 +88,7 @@ export function handleTokensRegistered(event: TokensRegistered): void {
 }
 
 export function handlePoolJoined(event: PoolJoined): void {
-  let poolId = event.params.poolId.toHex();
+  let poolId = event.params.poolId.toHexString();
   let amounts = event.params.amountsIn;
 
   let pool = Pool.load(poolId);

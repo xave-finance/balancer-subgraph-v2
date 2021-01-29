@@ -11,6 +11,7 @@ import {
   decrPoolCount,
 } from './helpers';
 import {
+  ZERO_ADDRESS,
   ZERO_BD,
 } from './constants';
 
@@ -39,24 +40,20 @@ export function handleExitPool(call: OnExitPoolCall): void {
  ************************************/
 
 export function handleTransfer(event: Transfer): void {
-  let poolTokenizerId = event.address.toHex();
   let poolAddress = event.address;
-
-  let ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
   let isMint = event.params.from.toHex() == ZERO_ADDRESS;
   let isBurn = event.params.to.toHex() == ZERO_ADDRESS;
 
-  let poolShareFromId = poolTokenizerId.concat('-').concat(event.params.from.toHex());
+  let poolShareFromId = poolAddress.toHex().concat('-').concat(event.params.from.toHex());
   let poolShareFrom = PoolShare.load(poolShareFromId);
   let poolShareFromBalance = poolShareFrom == null ? ZERO_BD : poolShareFrom.balance;
 
-  let poolShareToId = poolTokenizerId.concat('-').concat(event.params.to.toHex());
+  let poolShareToId = poolAddress.toHex().concat('-').concat(event.params.to.toHex());
   let poolShareTo = PoolShare.load(poolShareToId);
   let poolShareToBalance = poolShareTo == null ? ZERO_BD : poolShareTo.balance;
 
-  let poolTokenizer = PoolTokenizer.load(poolTokenizerId);
-  let pool = Pool.load(poolTokenizer.poolId);
+  let poolTokenizer = PoolTokenizer.load(poolAddress.toHexString());
 
   if (isMint) {
     if (poolShareTo == null) {
@@ -98,6 +95,5 @@ export function handleTransfer(event: Transfer): void {
     poolTokenizer.holdersCount = poolTokenizer.holdersCount.minus(BigInt.fromI32(1));
   }
 
-  pool.save();
   poolTokenizer.save();
 }

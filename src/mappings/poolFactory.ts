@@ -11,7 +11,7 @@ import { Balancer, Pool, PoolToken, Swap, TokenPrice, User, UserBalance, PoolTok
 
 // datasource
 import { WeightedPool as WeightedPoolTemplate } from '../types/templates'
-import { StablePool as StablePoolTemplate } from '../types/templates'
+//import { StablePool as StablePoolTemplate } from '../types/templates'
 
 import { WeightedPool } from '../types/templates/WeightedPool/WeightedPool'
 
@@ -30,7 +30,7 @@ export function handleNewPool(event: PoolCreated): void {
     vault.totalSwapFee = ZERO_BD;
   }
 
-  let poolAddress = event.params.pool
+  let poolAddress: Address = event.params.pool
   let poolContract = WeightedPool.bind(poolAddress);
 
   let poolIdCall = poolContract.try_getPoolId();
@@ -49,6 +49,9 @@ export function handleNewPool(event: PoolCreated): void {
     pool.tx = event.transaction.hash;
 
     pool.save();
+
+    // start receiving events
+    WeightedPoolTemplate.create(poolAddress);
   }
 
   vault.poolCount = vault.poolCount + 1;
@@ -61,10 +64,6 @@ export function handleNewPool(event: PoolCreated): void {
   poolTokenizer.joinsCount = BigInt.fromI32(0);
   poolTokenizer.exitsCount = BigInt.fromI32(0);
   poolTokenizer.save();
-
-
-  // start receiving events
-  WeightedPoolTemplate.create(poolAddress);
 }
 
 

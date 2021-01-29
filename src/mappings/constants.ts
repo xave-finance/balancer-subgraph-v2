@@ -4,6 +4,8 @@ let network = dataSource.network();
 
 export let ZERO_BD = BigDecimal.fromString('0');
 
+export let ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 export let WETH: Address =
   Address.fromString(
     network == 'mainnet'
