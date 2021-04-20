@@ -13,7 +13,7 @@ export class AddressByNetwork {
 let network: string = dataSource.network();
 
 let vaultAddressByNetwork: AddressByNetwork = {
-  mainnet: '0xTODO',
+  mainnet: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
   kovan: '0xba1222227c37746aDA22d10Da6265E02E44400DD',
   dev: '0xa0B05b20e511B1612E908dFCeE0E407E22B76028',
 };
@@ -25,7 +25,7 @@ let wethAddressByNetwork: AddressByNetwork = {
 };
 
 let wbtcAddressByNetwork: AddressByNetwork = {
-  mainnet: '0xTODO',
+  mainnet: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
   kovan: '0x1C8E3Bcb3378a443CC591f154c5CE0EBb4dA9648',
   dev: '0xcD80986f08d776CE41698c47f705CDc99dDBfB0A',
 };
