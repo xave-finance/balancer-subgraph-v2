@@ -25,6 +25,7 @@ jobs:
           graph_subgraph_name: "balancer-beta-v2"
           graph_account: "balancer-labs"
           graph_config_file: "subgraph.yaml"
+          graph_deploy_studio: true
 
 env:
   CI: true
