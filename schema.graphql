@@ -269,3 +269,4 @@ type BalancerSnapshot @entity {
   totalSwapVolume: BigDecimal!
   totalSwapFee: BigDecimal!
 }
+
