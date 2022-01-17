@@ -213,7 +213,7 @@ type PoolSnapshot @entity {
   totalShares: BigDecimal!
   swapVolume: BigDecimal!
   swapFees: BigDecimal!
-  liquidity: BigDecimal!
+  liquidity: BigDecimal
   timestamp: Int!
 }
 
@@ -268,4 +268,9 @@ type BalancerSnapshot @entity {
   totalSwapCount: BigInt!
   totalSwapVolume: BigDecimal!
   totalSwapFee: BigDecimal!
+}
+
+type WeightsLogger @entity {
+  id: ID!
+  weights: [BigInt!]
 }

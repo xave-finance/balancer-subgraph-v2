@@ -57,7 +57,7 @@ function createWeightedLikePool(event: PoolCreated, poolType: string): string {
   pool.save();
 
   // Load pool with initial weights
-  updatePoolWeights(poolId.toHexString());
+  updatePoolWeights(poolId.toHexString(), event.block.number.toString(), event.logIndex.toString());
 
   return poolId.toHexString();
 }
