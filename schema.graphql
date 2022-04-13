@@ -117,7 +117,7 @@ type UserInternalBalance @entity {
   balance: BigDecimal!
 }
 
-type GradualWeightUpdate @entity {
+type GradualWeightUpdate @entity(immutable: true) {
   id: ID!
   poolId: Pool!
   scheduledTimestamp: Int!
@@ -127,7 +127,7 @@ type GradualWeightUpdate @entity {
   endWeights: [BigInt!]!
 }
 
-type AmpUpdate @entity {
+type AmpUpdate @entity(immutable: true) {
   id: ID!
   poolId: Pool!
   scheduledTimestamp: Int!
@@ -137,7 +137,7 @@ type AmpUpdate @entity {
   endAmp: BigInt!
 }
 
-type Swap @entity {
+type Swap @entity(immutable: true) {
   id: ID!
   caller: Bytes!
   tokenIn: Bytes!
@@ -158,7 +158,7 @@ enum InvestType {
   Exit
 }
 
-type JoinExit @entity {
+type JoinExit @entity(immutable: true) {
   id: ID!
   type: InvestType!
   sender: Bytes!
@@ -199,7 +199,7 @@ type TokenPrice @entity {
   timestamp: Int!
 }
 
-type Investment @entity {
+type Investment @entity(immutable: true) {
   id: ID!
   assetManagerAddress: Bytes!
   amount: BigDecimal!
