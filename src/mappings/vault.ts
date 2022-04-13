@@ -34,9 +34,9 @@ import { updateAmpFactor } from './helpers/stable';
 export function handleInternalBalanceChange(event: InternalBalanceChanged): void {
   createUserEntity(event.params.user);
 
-  let userAddress = event.params.user.toHexString();
+  let userAddress = event.params.user;
   let token = event.params.token;
-  let balanceId = userAddress.concat(token.toHexString());
+  let balanceId = userAddress.concat(token);
 
   let userBalance = UserInternalBalance.load(balanceId);
   if (userBalance == null) {
@@ -72,20 +72,20 @@ export function handleBalanceChange(event: PoolBalanceChanged): void {
 }
 
 function handlePoolJoined(event: PoolBalanceChanged): void {
-  let poolId: string = event.params.poolId.toHexString();
+  let poolId = event.params.poolId;
   let amounts: BigInt[] = event.params.deltas;
   let blockTimestamp = event.block.timestamp.toI32();
-  let logIndex = event.logIndex;
+  let logIndex = event.logIndex.toI32();
   let transactionHash = event.transaction.hash;
 
   let pool = Pool.load(poolId);
   if (pool == null) {
-    log.warning('Pool not found in handlePoolJoined: {} {}', [poolId, transactionHash.toHexString()]);
+    log.warning('Pool not found in handlePoolJoined: {} {}', [poolId.toHexString(), transactionHash.toHexString()]);
     return;
   }
   let tokenAddresses = pool.tokensList;
 
-  let joinId = transactionHash.toHexString().concat(logIndex.toString());
+  let joinId = transactionHash.concatI32(logIndex);
   let join = new JoinExit(joinId);
   join.sender = event.params.liquidityProvider;
   let joinAmounts = new Array<BigDecimal>(amounts.length);
@@ -100,8 +100,8 @@ function handlePoolJoined(event: PoolBalanceChanged): void {
   }
   join.type = 'Join';
   join.amounts = joinAmounts;
-  join.pool = event.params.poolId.toHexString();
-  join.user = event.params.liquidityProvider.toHexString();
+  join.pool = event.params.poolId;
+  join.user = event.params.liquidityProvider;
   join.timestamp = blockTimestamp;
   join.tx = transactionHash;
   join.save();
@@ -161,22 +161,22 @@ function handlePoolJoined(event: PoolBalanceChanged): void {
 }
 
 function handlePoolExited(event: PoolBalanceChanged): void {
-  let poolId = event.params.poolId.toHex();
+  let poolId = event.params.poolId;
   let amounts = event.params.deltas;
   let blockTimestamp = event.block.timestamp.toI32();
-  let logIndex = event.logIndex;
+  let logIndex = event.logIndex.toI32();
   let transactionHash = event.transaction.hash;
 
   let pool = Pool.load(poolId);
   if (pool == null) {
-    log.warning('Pool not found in handlePoolExited: {} {}', [poolId, transactionHash.toHexString()]);
+    log.warning('Pool not found in handlePoolExited: {} {}', [poolId.toHexString(), transactionHash.toHexString()]);
     return;
   }
   let tokenAddresses = pool.tokensList;
 
   pool.save();
 
-  let exitId = transactionHash.toHexString().concat(logIndex.toString());
+  let exitId = transactionHash.concatI32(logIndex);
   let exit = new JoinExit(exitId);
   exit.sender = event.params.liquidityProvider;
   let exitAmounts = new Array<BigDecimal>(amounts.length);
@@ -191,8 +191,8 @@ function handlePoolExited(event: PoolBalanceChanged): void {
   }
   exit.type = 'Exit';
   exit.amounts = exitAmounts;
-  exit.pool = event.params.poolId.toHexString();
-  exit.user = event.params.liquidityProvider.toHexString();
+  exit.pool = event.params.poolId;
+  exit.user = event.params.liquidityProvider;
   exit.timestamp = blockTimestamp;
   exit.tx = transactionHash;
   exit.save();
@@ -241,7 +241,7 @@ function handlePoolExited(event: PoolBalanceChanged): void {
  ************************************/
 export function handleBalanceManage(event: PoolBalanceManaged): void {
   let poolId = event.params.poolId;
-  let pool = Pool.load(poolId.toHex());
+  let pool = Pool.load(poolId);
   if (pool == null) {
     log.warning('Pool not found in handleBalanceManage: {}', [poolId.toHexString()]);
     return;
@@ -253,7 +253,7 @@ export function handleBalanceManage(event: PoolBalanceManaged): void {
   //let cashDelta = event.params.cashDelta;
   let managedDelta = event.params.managedDelta;
 
-  let poolToken = loadPoolToken(poolId.toHexString(), token);
+  let poolToken = loadPoolToken(poolId, token);
   if (poolToken == null) {
     throw new Error('poolToken not found');
   }
@@ -263,7 +263,7 @@ export function handleBalanceManage(event: PoolBalanceManaged): void {
   poolToken.invested = poolToken.invested.plus(managedDeltaAmount);
   poolToken.save();
 
-  let assetManagerId = poolToken.id.concat(assetManagerAddress.toHexString());
+  let assetManagerId = poolToken.id.concat(assetManagerAddress);
 
   let investment = new Investment(assetManagerId);
   investment.assetManagerAddress = assetManagerAddress;
@@ -280,7 +280,7 @@ export function handleSwapEvent(event: SwapEvent): void {
   createUserEntity(event.transaction.from);
   let poolId = event.params.poolId;
 
-  let pool = Pool.load(poolId.toHexString());
+  let pool = Pool.load(poolId);
   if (pool == null) {
     log.warning('Pool not found in handleSwapEvent: {}', [poolId.toHexString()]);
     return;
@@ -288,7 +288,7 @@ export function handleSwapEvent(event: SwapEvent): void {
 
   if (isVariableWeightPool(pool)) {
     // Some pools' weights update over time so we need to update them after each swap
-    updatePoolWeights(poolId.toHexString());
+    updatePoolWeights(poolId);
   } else if (isStableLikePool(pool)) {
     // Stablelike pools' amplification factors update over time so we need to update them after each swap
     updateAmpFactor(pool);
@@ -308,12 +308,12 @@ export function handleSwapEvent(event: SwapEvent): void {
   let tokenInAddress: Address = event.params.tokenIn;
   let tokenOutAddress: Address = event.params.tokenOut;
 
-  let logIndex = event.logIndex;
+  let logIndex = event.logIndex.toI32();
   let transactionHash = event.transaction.hash;
   let blockTimestamp = event.block.timestamp.toI32();
 
-  let poolTokenIn = loadPoolToken(poolId.toHexString(), tokenInAddress);
-  let poolTokenOut = loadPoolToken(poolId.toHexString(), tokenOutAddress);
+  let poolTokenIn = loadPoolToken(poolId, tokenInAddress);
+  let poolTokenOut = loadPoolToken(poolId, tokenOutAddress);
   if (poolTokenIn == null || poolTokenOut == null) {
     log.warning('PoolToken not found in handleSwapEvent: (tokenIn: {}), (tokenOut: {})', [
       tokenInAddress.toHexString(),
@@ -334,7 +334,7 @@ export function handleSwapEvent(event: SwapEvent): void {
     swapFeesUSD = swapValueUSD.times(swapFee);
   }
 
-  let swapId = transactionHash.toHexString().concat(logIndex.toString());
+  let swapId = transactionHash.concatI32(logIndex);
   let swap = new Swap(swapId);
   swap.tokenIn = tokenInAddress;
   swap.tokenInSym = poolTokenIn.symbol;
@@ -348,8 +348,8 @@ export function handleSwapEvent(event: SwapEvent): void {
   // swap.valueUSD = swapValueUSD;
 
   swap.caller = event.transaction.from;
-  swap.userAddress = event.transaction.from.toHex();
-  swap.poolId = poolId.toHex();
+  swap.userAddress = event.transaction.from;
+  swap.poolId = poolId;
 
   swap.timestamp = blockTimestamp;
   swap.tx = transactionHash;
@@ -414,10 +414,10 @@ export function handleSwapEvent(event: SwapEvent): void {
   let tokenInWeight = poolTokenIn.weight;
   let tokenOutWeight = poolTokenOut.weight;
   if (isPricingAsset(tokenInAddress)) {
-    let tokenPriceId = getTokenPriceId(poolId.toHex(), tokenOutAddress, tokenInAddress, block);
+    let tokenPriceId = getTokenPriceId(poolId, tokenOutAddress, tokenInAddress, block);
     let tokenPrice = new TokenPrice(tokenPriceId);
     //tokenPrice.poolTokenId = getPoolTokenId(poolId, tokenOutAddress);
-    tokenPrice.poolId = poolId.toHexString();
+    tokenPrice.poolId = poolId;
     tokenPrice.block = block;
     tokenPrice.timestamp = blockTimestamp;
     tokenPrice.asset = tokenOutAddress;
@@ -434,13 +434,13 @@ export function handleSwapEvent(event: SwapEvent): void {
     }
 
     tokenPrice.save();
-    updatePoolLiquidity(poolId.toHex(), block, tokenInAddress, blockTimestamp);
+    updatePoolLiquidity(poolId, block, tokenInAddress, blockTimestamp);
   }
   if (isPricingAsset(tokenOutAddress)) {
-    let tokenPriceId = getTokenPriceId(poolId.toHex(), tokenInAddress, tokenOutAddress, block);
+    let tokenPriceId = getTokenPriceId(poolId, tokenInAddress, tokenOutAddress, block);
     let tokenPrice = new TokenPrice(tokenPriceId);
     //tokenPrice.poolTokenId = getPoolTokenId(poolId, tokenInAddress);
-    tokenPrice.poolId = poolId.toHexString();
+    tokenPrice.poolId = poolId;
     tokenPrice.block = block;
     tokenPrice.timestamp = blockTimestamp;
     tokenPrice.asset = tokenInAddress;
@@ -457,6 +457,6 @@ export function handleSwapEvent(event: SwapEvent): void {
     }
 
     tokenPrice.save();
-    updatePoolLiquidity(poolId.toHex(), block, tokenOutAddress, blockTimestamp);
+    updatePoolLiquidity(poolId, block, tokenOutAddress, blockTimestamp);
   }
 }

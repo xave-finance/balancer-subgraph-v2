@@ -11,7 +11,7 @@ export function isPricingAsset(asset: Address): boolean {
   return false;
 }
 
-export function updatePoolLiquidity(poolId: string, block: BigInt, pricingAsset: Address, timestamp: i32): boolean {
+export function updatePoolLiquidity(poolId: Bytes, block: BigInt, pricingAsset: Address, timestamp: i32): boolean {
   let pool = Pool.load(poolId);
   if (pool == null) return false;
 
@@ -168,12 +168,12 @@ export function swapValueInUSD(
   return swapValueUSD;
 }
 
-function getLatestPriceId(tokenAddress: Address, pricingAsset: Address): string {
-  return tokenAddress.toHexString().concat('-').concat(pricingAsset.toHexString());
+function getLatestPriceId(tokenAddress: Bytes, pricingAsset: Bytes): Bytes {
+  return tokenAddress.concat(pricingAsset);
 }
 
-function getPoolHistoricalLiquidityId(poolId: string, tokenAddress: Address, block: BigInt): string {
-  return poolId.concat('-').concat(tokenAddress.toHexString()).concat('-').concat(block.toString());
+function getPoolHistoricalLiquidityId(poolId: Bytes, tokenAddress: Bytes, block: BigInt): Bytes {
+  return poolId.concat(tokenAddress).concatI32(block.toI32());
 }
 
 export function isUSDStable(asset: Address): boolean {

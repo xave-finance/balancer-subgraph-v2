@@ -1,4 +1,4 @@
-import { Address } from '@graphprotocol/graph-ts';
+import { Address, Bytes } from '@graphprotocol/graph-ts';
 
 import { Pool } from '../../types/schema';
 import { WeightedPool } from '../../types/templates/WeightedPool/WeightedPool';
@@ -6,7 +6,7 @@ import { WeightedPool } from '../../types/templates/WeightedPool/WeightedPool';
 import { ZERO_BD } from './constants';
 import { scaleDown, loadPoolToken } from './misc';
 
-export function updatePoolWeights(poolId: string): void {
+export function updatePoolWeights(poolId: Bytes): void {
   let pool = Pool.load(poolId);
   if (pool == null) return;
 

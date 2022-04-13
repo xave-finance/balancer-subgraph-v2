@@ -11,7 +11,7 @@ type Balancer @entity {
 }
 
 type Pool @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   poolType: String
   factory: Bytes
@@ -68,7 +68,7 @@ type Pool @entity {
 }
 
 type PoolToken @entity {
-  id: ID!
+  id: Bytes!
   poolId: Pool!
   token: Token!
   symbol: String!
@@ -85,7 +85,7 @@ type PoolToken @entity {
 }
 
 type PriceRateProvider @entity {
-  id: ID!
+  id: Bytes!
   poolId: Pool!
   token: PoolToken!
   address: Bytes!
@@ -96,14 +96,14 @@ type PriceRateProvider @entity {
 }
 
 type PoolShare @entity {
-  id: ID!
+  id: Bytes!
   userAddress: User!
   poolId: Pool!
   balance: BigDecimal!
 }
 
 type User @entity {
-  id: ID!
+  id: Bytes!
   sharesOwned: [PoolShare!] @derivedFrom(field: "userAddress")
   swaps: [Swap!] @derivedFrom(field: "userAddress")
   userInternalBalances: [UserInternalBalance!]
@@ -111,14 +111,14 @@ type User @entity {
 }
 
 type UserInternalBalance @entity {
-  id: ID!
+  id: Bytes!
   userAddress: User
   token: Bytes!
   balance: BigDecimal!
 }
 
 type GradualWeightUpdate @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   poolId: Pool!
   scheduledTimestamp: Int!
   startTimestamp: BigInt!
@@ -128,7 +128,7 @@ type GradualWeightUpdate @entity(immutable: true) {
 }
 
 type AmpUpdate @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   poolId: Pool!
   scheduledTimestamp: Int!
   startTimestamp: BigInt!
@@ -138,7 +138,7 @@ type AmpUpdate @entity(immutable: true) {
 }
 
 type Swap @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   caller: Bytes!
   tokenIn: Bytes!
   tokenInSym: String!
@@ -159,7 +159,7 @@ enum InvestType {
 }
 
 type JoinExit @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   type: InvestType!
   sender: Bytes!
   amounts: [BigDecimal!]!
@@ -170,7 +170,7 @@ type JoinExit @entity(immutable: true) {
 }
 
 type LatestPrice @entity {
-  id: ID!
+  id: Bytes!
   asset: Bytes!
   pricingAsset: Bytes! # address of stable asset
   poolId: Pool! # last pool which set price
@@ -179,7 +179,7 @@ type LatestPrice @entity {
 }
 
 type PoolHistoricalLiquidity @entity {
-  id: ID!
+  id: Bytes!
   poolId: Pool!
   poolTotalShares: BigDecimal!
   poolLiquidity: BigDecimal! # total value, priced in the stable asset - ie USD
@@ -189,7 +189,7 @@ type PoolHistoricalLiquidity @entity {
 }
 
 type TokenPrice @entity {
-  id: ID! # address of token + address of stablecoin-poolId
+  id: Bytes! # address of token + address of stablecoin-poolId
   poolId: Pool!
   asset: Bytes!
   amount: BigDecimal!
@@ -200,7 +200,7 @@ type TokenPrice @entity {
 }
 
 type Investment @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   assetManagerAddress: Bytes!
   amount: BigDecimal!
   poolTokenId: PoolToken!
@@ -208,7 +208,7 @@ type Investment @entity(immutable: true) {
 }
 
 type PoolSnapshot @entity {
-  id: ID!
+  id: Bytes!
   pool: Pool!
   amounts: [BigDecimal!]!
   totalShares: BigDecimal!
@@ -219,7 +219,7 @@ type PoolSnapshot @entity {
 }
 
 type Token @entity {
-  id: ID!
+  id: Bytes!
   symbol: String
   name: String
   decimals: Int!
@@ -233,7 +233,7 @@ type Token @entity {
 }
 
 type TokenSnapshot @entity {
-  id: ID! # token address + dayId
+  id: Bytes! # token address + dayId
   token: Token!
   timestamp: Int! # timestamp representing the start of day in UTC
   totalBalanceUSD: BigDecimal! # total balance of tokens across balancer
@@ -245,7 +245,7 @@ type TokenSnapshot @entity {
 
 type TradePair @entity {
   "Token Address - Token Address"
-  id: ID!
+  id: Bytes!
   token0: Token!
   token1: Token!
   totalSwapVolume: BigDecimal!
@@ -253,7 +253,7 @@ type TradePair @entity {
 }
 
 type TradePairSnapshot @entity {
-  id: ID!
+  id: Bytes!
   pair: TradePair!
   timestamp: Int!
   totalSwapVolume: BigDecimal!
@@ -261,7 +261,7 @@ type TradePairSnapshot @entity {
 }
 
 type BalancerSnapshot @entity {
-  id: ID!
+  id: Bytes!
   vault: Balancer!
   timestamp: Int!
   poolCount: Int!

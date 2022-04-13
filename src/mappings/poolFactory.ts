@@ -51,13 +51,13 @@ function createWeightedLikePool(event: PoolCreated, poolType: string): string {
     pool.tokensList = changetype<Bytes[]>(tokens);
 
     for (let i: i32 = 0; i < tokens.length; i++) {
-      createPoolTokenEntity(poolId.toHexString(), tokens[i]);
+      createPoolTokenEntity(poolId, tokens[i]);
     }
   }
   pool.save();
 
   // Load pool with initial weights
-  updatePoolWeights(poolId.toHexString());
+  updatePoolWeights(poolId);
 
   return poolId.toHexString();
 }
@@ -103,7 +103,7 @@ function createStableLikePool(event: PoolCreated, poolType: string): string {
     pool.tokensList = changetype<Bytes[]>(tokens);
 
     for (let i: i32 = 0; i < tokens.length; i++) {
-      createPoolTokenEntity(poolId.toHexString(), tokens[i]);
+      createPoolTokenEntity(poolId, tokens[i]);
     }
   }
 
@@ -170,7 +170,7 @@ export function handleNewCCPPool(event: PoolCreated): void {
     pool.tokensList = changetype<Bytes[]>(tokens);
 
     for (let i: i32 = 0; i < tokens.length; i++) {
-      createPoolTokenEntity(poolId.toHexString(), tokens[i]);
+      createPoolTokenEntity(poolId, tokens[i]);
     }
   }
   pool.save();
@@ -219,7 +219,7 @@ function handleNewLinearPool(event: PoolCreated, poolType: string): void {
     pool.tokensList = changetype<Bytes[]>(tokens);
 
     for (let i: i32 = 0; i < tokens.length; i++) {
-      createPoolTokenEntity(poolId.toHexString(), tokens[i]);
+      createPoolTokenEntity(poolId, tokens[i]);
     }
   }
   let maxTokenBalance = BigDecimal.fromString('5192296858534827.628530496329220095');
@@ -246,9 +246,9 @@ function findOrInitializeVault(): Balancer {
 function handleNewPool(event: PoolCreated, poolId: Bytes, swapFee: BigInt): Pool {
   let poolAddress: Address = event.params.pool;
 
-  let pool = Pool.load(poolId.toHexString());
+  let pool = Pool.load(poolId);
   if (pool == null) {
-    pool = newPoolEntity(poolId.toHexString());
+    pool = newPoolEntity(poolId);
 
     pool.swapFee = scaleDown(swapFee, 18);
     pool.createTime = event.block.timestamp.toI32();

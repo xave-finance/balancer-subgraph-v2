@@ -1,4 +1,4 @@
-import { Address } from '@graphprotocol/graph-ts';
+import { Address, Bytes } from '@graphprotocol/graph-ts';
 import { Pool } from '../../types/schema';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -32,6 +32,6 @@ export function isStableLikePool(pool: Pool): boolean {
   );
 }
 
-export function getPoolAddress(poolId: string): Address {
-  return changetype<Address>(Address.fromHexString(poolId.slice(0, 42)));
+export function getPoolAddress(poolId: Bytes): Address {
+  return changetype<Address>(Address.fromHexString(poolId.toHexString().slice(0, 42)));
 }

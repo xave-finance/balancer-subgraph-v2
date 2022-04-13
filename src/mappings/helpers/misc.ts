@@ -1,4 +1,4 @@
-import { BigDecimal, Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { BigDecimal, Address, BigInt, ethereum, Bytes } from '@graphprotocol/graph-ts';
 import {
   Pool,
   User,
@@ -38,11 +38,11 @@ export function scaleDown(num: BigInt, decimals: i32): BigDecimal {
   return num.divDecimal(BigInt.fromI32(10).pow(u8(decimals)).toBigDecimal());
 }
 
-export function getPoolShareId(poolControllerAddress: Address, lpAddress: Address): string {
-  return poolControllerAddress.toHex().concat('-').concat(lpAddress.toHex());
+export function getPoolShareId(poolControllerAddress: Address, lpAddress: Address): Bytes {
+  return poolControllerAddress.concat(lpAddress);
 }
 
-export function getPoolShare(poolId: string, lpAddress: Address): PoolShare {
+export function getPoolShare(poolId: Bytes, lpAddress: Address): PoolShare {
   let poolShareId = getPoolShareId(getPoolAddress(poolId), lpAddress);
   let poolShare = PoolShare.load(poolShareId);
   if (poolShare == null) {
@@ -51,13 +51,13 @@ export function getPoolShare(poolId: string, lpAddress: Address): PoolShare {
   return poolShare;
 }
 
-export function createPoolShareEntity(poolId: string, lpAddress: Address): PoolShare {
+export function createPoolShareEntity(poolId: Bytes, lpAddress: Address): PoolShare {
   createUserEntity(lpAddress);
 
   let id = getPoolShareId(getPoolAddress(poolId), lpAddress);
   let poolShare = new PoolShare(id);
 
-  poolShare.userAddress = lpAddress.toHex();
+  poolShare.userAddress = lpAddress;
   poolShare.poolId = poolId;
   poolShare.balance = ZERO_BD;
   poolShare.save();
@@ -65,10 +65,10 @@ export function createPoolShareEntity(poolId: string, lpAddress: Address): PoolS
 }
 
 // pool entity when created
-export function newPoolEntity(poolId: string): Pool {
+export function newPoolEntity(poolId: Bytes): Pool {
   let pool = new Pool(poolId);
   pool.vaultID = '2';
-  pool.strategyType = i32(parseInt(poolId.slice(42, 46)));
+  pool.strategyType = i32(parseInt(poolId.toHex().slice(42, 46)));
   pool.tokensList = [];
   pool.totalWeight = ZERO_BD;
   pool.totalSwapVolume = ZERO_BD;
@@ -81,15 +81,15 @@ export function newPoolEntity(poolId: string): Pool {
   return pool;
 }
 
-export function getPoolTokenId(poolId: string, tokenAddress: Address): string {
-  return poolId.concat('-').concat(tokenAddress.toHexString());
+export function getPoolTokenId(poolId: Bytes, tokenAddress: Bytes): Bytes {
+  return poolId.concat(tokenAddress);
 }
 
-export function loadPoolToken(poolId: string, tokenAddress: Address): PoolToken | null {
+export function loadPoolToken(poolId: Bytes, tokenAddress: Bytes): PoolToken | null {
   return PoolToken.load(getPoolTokenId(poolId, tokenAddress));
 }
 
-export function createPoolTokenEntity(poolId: string, tokenAddress: Address): void {
+export function createPoolTokenEntity(poolId: Bytes, tokenAddress: Address): void {
   let poolTokenId = getPoolTokenId(poolId, tokenAddress);
 
   let token = ERC20.bind(tokenAddress);
@@ -138,23 +138,12 @@ export function createPoolTokenEntity(poolId: string, tokenAddress: Address): vo
   poolToken.save();
 }
 
-export function loadPriceRateProvider(poolId: string, tokenAddress: Address): PriceRateProvider | null {
+export function loadPriceRateProvider(poolId: Bytes, tokenAddress: Address): PriceRateProvider | null {
   return PriceRateProvider.load(getPoolTokenId(poolId, tokenAddress));
 }
 
-export function getTokenPriceId(
-  poolId: string,
-  tokenAddress: Address,
-  stableTokenAddress: Address,
-  block: BigInt
-): string {
-  return poolId
-    .concat('-')
-    .concat(tokenAddress.toHexString())
-    .concat('-')
-    .concat(stableTokenAddress.toHexString())
-    .concat('-')
-    .concat(block.toString());
+export function getTokenPriceId(poolId: Bytes, tokenAddress: Bytes, stableTokenAddress: Bytes, block: BigInt): Bytes {
+  return poolId.concat(tokenAddress).concat(stableTokenAddress).concatI32(block.toI32());
 }
 
 export function createPoolSnapshot(pool: Pool, timestamp: i32): void {
@@ -163,7 +152,7 @@ export function createPoolSnapshot(pool: Pool, timestamp: i32): void {
   let poolId = pool.id;
   if (pool == null || !pool.tokensList) return;
 
-  let snapshotId = poolId + '-' + dayTimestamp.toString();
+  let snapshotId = poolId.concatI32(dayTimestamp);
   let snapshot = PoolSnapshot.load(snapshotId);
 
   if (!snapshot) {
@@ -191,17 +180,16 @@ export function createPoolSnapshot(pool: Pool, timestamp: i32): void {
   snapshot.save();
 }
 
-export function createUserEntity(address: Address): void {
-  let addressHex = address.toHex();
-  if (User.load(addressHex) == null) {
-    let user = new User(addressHex);
+export function createUserEntity(address: Bytes): void {
+  if (User.load(address) == null) {
+    let user = new User(address);
     user.save();
   }
 }
 
 export function createToken(tokenAddress: Address): Token {
   let erc20token = ERC20.bind(tokenAddress);
-  let token = new Token(tokenAddress.toHexString());
+  let token = new Token(tokenAddress);
   let name = '';
   let symbol = '';
   let decimals = 0;
@@ -231,22 +219,22 @@ export function createToken(tokenAddress: Address): Token {
 // this will create the token entity and populate
 // with erc20 values
 export function getToken(tokenAddress: Address): Token {
-  let token = Token.load(tokenAddress.toHexString());
+  let token = Token.load(Bytes.fromHexString(tokenAddress.toHexString()));
   if (token == null) {
     token = createToken(tokenAddress);
   }
   return token;
 }
 
-export function getTokenSnapshot(tokenAddress: Address, event: ethereum.Event): TokenSnapshot {
+export function getTokenSnapshot(tokenAddress: Bytes, event: ethereum.Event): TokenSnapshot {
   let timestamp = event.block.timestamp.toI32();
   let dayID = timestamp / 86400;
-  let id = tokenAddress.toHexString() + '-' + dayID.toString();
+  let id = tokenAddress.concatI32(dayID);
   let dayData = TokenSnapshot.load(id);
 
   if (dayData == null) {
     let dayStartTimestamp = dayID * 86400;
-    let token = getToken(tokenAddress);
+    let token = getToken(Address.fromBytes(tokenAddress));
     dayData = new TokenSnapshot(id);
     dayData.timestamp = dayStartTimestamp;
     dayData.totalSwapCount = token.totalSwapCount;
@@ -261,8 +249,8 @@ export function getTokenSnapshot(tokenAddress: Address, event: ethereum.Event): 
   return dayData;
 }
 
-export function uptickSwapsForToken(tokenAddress: Address, event: ethereum.Event): void {
-  let token = getToken(tokenAddress);
+export function uptickSwapsForToken(tokenAddress: Bytes, event: ethereum.Event): void {
+  let token = getToken(Address.fromBytes(tokenAddress));
   // update the overall swap count for the token
   token.totalSwapCount = token.totalSwapCount.plus(BigInt.fromI32(1));
   token.save();
@@ -307,12 +295,12 @@ export function getTradePair(token0Address: Address, token1Address: Address): Tr
   sortedAddresses[1] = token1Address.toHexString();
   sortedAddresses.sort();
 
-  let tradePairId = sortedAddresses[0] + '-' + sortedAddresses[1];
+  let tradePairId = Bytes.fromHexString(sortedAddresses[0].concat(sortedAddresses[1]));
   let tradePair = TradePair.load(tradePairId);
   if (tradePair == null) {
     tradePair = new TradePair(tradePairId);
-    tradePair.token0 = sortedAddresses[0];
-    tradePair.token1 = sortedAddresses[1];
+    tradePair.token0 = Bytes.fromHexString(sortedAddresses[0]);
+    tradePair.token1 = Bytes.fromHexString(sortedAddresses[1]);
     tradePair.totalSwapFee = ZERO_BD;
     tradePair.totalSwapVolume = ZERO_BD;
     tradePair.save();
@@ -320,9 +308,9 @@ export function getTradePair(token0Address: Address, token1Address: Address): Tr
   return tradePair;
 }
 
-export function getTradePairSnapshot(tradePairId: string, timestamp: i32): TradePairSnapshot {
+export function getTradePairSnapshot(tradePairId: Bytes, timestamp: i32): TradePairSnapshot {
   let dayID = timestamp / 86400;
-  let id = tradePairId + '-' + dayID.toString();
+  let id = tradePairId.concatI32(dayID);
   let snapshot = TradePairSnapshot.load(id);
   if (snapshot == null) {
     let dayStartTimestamp = dayID * 86400;
@@ -340,7 +328,7 @@ export function getTradePairSnapshot(tradePairId: string, timestamp: i32): Trade
 
 export function getBalancerSnapshot(vaultId: string, timestamp: i32): BalancerSnapshot {
   let dayID = timestamp / 86400;
-  let id = vaultId + '-' + dayID.toString();
+  let id = Bytes.fromUTF8(vaultId).concatI32(dayID);
   let snapshot = BalancerSnapshot.load(id);
 
   if (snapshot == null) {
