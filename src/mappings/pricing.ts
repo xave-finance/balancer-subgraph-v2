@@ -27,6 +27,7 @@ import {
   MAX_TIME_DIFF_FOR_PRICING,
 } from './helpers/constants';
 import { AnswerUpdated } from '../types/templates/OffchainAggregator/AccessControlledOffchainAggregator';
+import { getFXPrice } from './helpers/fx';
 
 export function isPricingAsset(asset: Address): boolean {
   for (let i: i32 = 0; i < PRICING_ASSETS.length; i++) {
@@ -396,7 +397,7 @@ export function handleAnswerUpdated(event: AnswerUpdated): void {
     token.fxOracleDecimals = 8;
   }
 
-  let rate = scaleDown(event.params.current, 8);
-  token.latestFXPrice = rate;
+  token.latestFXPrice = getFXPrice(tokenAddress, event.params.current);
+
   token.save();
 }
