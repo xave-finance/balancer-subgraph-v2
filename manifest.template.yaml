@@ -1695,6 +1695,32 @@ dataSources:
         - event: NewFXPool(indexed address,indexed bytes32,indexed address)
           handler: handleNewFXPoolV1
   {{/if}}
+
+
+  {{#if FXPoolDeployerTracker}}
+  - kind: ethereum/contract
+    name: FXPoolDeployerTracker
+    network: {{network}}
+    source:
+      address: '{{FXPoolDeployerTracker.address}}'
+      abi: FXPoolDeployerTracker
+      startBlock: {{FXPoolDeployerTracker.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/poolFactory.ts
+      entities:
+        - Balancer
+        - Pool
+      abis:
+        - name: FXPoolDeployerTracker
+          file: ./abis/FXPoolDeployerTracker.json
+      eventHandlers:
+        - event: NewFXPoolDeployer(indexed address,indexed address,indexed address)
+          handler: handleNewFXPoolDeployer
+  {{/if}}
+
   {{#if FXPoolDeployer}}
   - kind: ethereum/contract
     name: FXPoolDeployer
@@ -2357,6 +2383,42 @@ templates:
           handler: handlePauseGyroPool
         - event: UnpausedLocally()
           handler: handleUnpauseGyroPool
+  - kind: ethereum/contract
+    name: FXPoolDeployerTracker
+    network: {{network}}
+    source:
+      abi: FXPoolDeployerTracker
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/poolController.ts
+      entities:
+        - Pool
+      abis:
+        - name: FXPoolDeployerTracker
+          file: ./abis/FXPoolDeployerTracker.json
+  - kind: ethereum/contract
+    name: FXPoolDeployer
+    network: {{network}}
+    source:
+      abi: FXPoolDeployer
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mappings/poolController.ts
+      entities:
+        - Pool
+        - PoolShare
+        - Swap
+        - PoolToken
+        - GradualWeightUpdate
+      abis:
+        - name: FXPoolDeployer
+          file: ./abis/FXPoolDeployer.json
+        - name: FXPool
+          file: ./abis/FXPool.json
   - kind: ethereum/contract
     name: FXPool
     network: {{network}}
