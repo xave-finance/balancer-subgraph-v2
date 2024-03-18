@@ -2384,21 +2384,6 @@ templates:
         - event: UnpausedLocally()
           handler: handleUnpauseGyroPool
   - kind: ethereum/contract
-    name: FXPoolDeployerTracker
-    network: {{network}}
-    source:
-      abi: FXPoolDeployerTracker
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/mappings/poolController.ts
-      entities:
-        - Pool
-      abis:
-        - name: FXPoolDeployerTracker
-          file: ./abis/FXPoolDeployerTracker.json
-  - kind: ethereum/contract
     name: FXPoolDeployer
     network: {{network}}
     source:
