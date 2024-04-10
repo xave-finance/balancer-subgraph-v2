@@ -1,0 +1,10 @@
+{
+  "stableAssets": [
+    {
+      "address": "0xae2C46ddb314B9Ba743C6dEE4878F151881333D9",
+      "symbol": "USDC"
+    }
+  ],
+  "pricingAssets": [],
+  "fxAssetAggregators": []
+}
