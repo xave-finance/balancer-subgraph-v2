@@ -26,15 +26,10 @@ taiko-katla:
   WeightedPoolFactory:
     address: "0x09D52F5B9E6f1682d3c449b612c421b598666238"
     startBlock: 766972
-  MockWeightedPool:
-    address: "0x9898F6cCdDDCB4441892aCA7bB0785C3c95CAd6d"
-    startBlock: 766972
   BalancerPoolDataQueries:
     address: "0xc41F5451ECaf22800FD52d4601C0cE69aeE4D4b3"
     startBlock: 766972
   ComposableStablePoolFactory:
     address: "0xBc72894beef4de732f60dE2EBAdF8dD9E4C89B6f"
     startBlock: 766972
-  MockComposableStablePool:
-    address: "0x1498038E3888aac2AE12146CF52F9b6d8A245025"
-    startBlock: 766972
+
