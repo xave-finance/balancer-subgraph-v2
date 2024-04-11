@@ -1,35 +1,34 @@
-taiko-katla:
+katla:
   network: taiko-katla
-  graft:
-    block: 766972
+  # graft:
+  #   block: 766963
   Authorizer:
-    address: 0xb74c41488c54e9A7617f1244F62200fA6727abd4
-    startBlock: 766972
+    address: "0xb74c41488c54e9A7617f1244F62200fA6727abd4"
+    startBlock: 766963
   Vault:
     address: "0x5644c8baCef3F48652A21C6943E204fC4aEc8aA9"
-    startBlock: 766972
+    startBlock: 766963
   ProtocolFeesCollector:
     address: "0x0A1f23a241145F03C0e6870419f7fE1EF0f8D730"
-    startBlock: 766972
+    startBlock: 766963
   AuthorizerAdaptor:
     address: "0xaCB1DCC391D22cd80f63f6027791F7e1775E48A1"
-    startBlock: 766972
+    startBlock: 766963
   BalancerQueries:
     address: "0x331DC7A64A8F7874C032434E179573421b2d7135"
-    startBlock: 766972
+    startBlock: 766963
   ProtocolFeePercentagesProvider:
     address: "0x96cedc58b95149DD0Fb535C3bBd5F43892Ed3F08"
-    startBlock: 766972
+    startBlock: 766963
   AuthorizerAdaptorEntrypoint:
     address: "0xd8AE960ac82BA4A5a5A27095bD4572d308b4302b"
-    startBlock: 766972
-  WeightedPoolFactory:
+    startBlock: 766963
+  WeightedPoolV4Factory:
     address: "0x09D52F5B9E6f1682d3c449b612c421b598666238"
-    startBlock: 766972
+    startBlock: 766963
   BalancerPoolDataQueries:
     address: "0xc41F5451ECaf22800FD52d4601C0cE69aeE4D4b3"
-    startBlock: 766972
-  ComposableStablePoolFactory:
+    startBlock: 766963
+  ComposableStablePoolV6Factory:
     address: "0xBc72894beef4de732f60dE2EBAdF8dD9E4C89B6f"
-    startBlock: 766972
-
+    startBlock: 766963

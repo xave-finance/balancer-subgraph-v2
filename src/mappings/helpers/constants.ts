@@ -33,9 +33,7 @@ export let USD_STABLE_ASSETS = assets.stableAssets;
 export let PRICING_ASSETS = assets.stableAssets.concat(assets.pricingAssets);
 
 class AddressByNetwork {
-  public canonical: string;
-  public custom: string;
-  public fantom: string;
+  public taikokatla: string;
 }
 
 let network: string = dataSource.network();
@@ -45,18 +43,15 @@ let network: string = dataSource.network();
 // in that case, AddressByNetwork and forNetwork must be updated accordingly
 // with a new entry for the new network - folowwing subgraph slugs
 let vaultAddressByNetwork: AddressByNetwork = {
-  canonical: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
-  custom: '0x0000000000000000000000000000000000000000',
-  fantom: '0x20dd72Ed959b6147912C2e529F0a0C651c33c9ce',
+  taikokatla: '0x5644c8baCef3F48652A21C6943E204fC4aEc8aA9',
 };
 
 function forNetwork(addressByNetwork: AddressByNetwork, network: string): Address {
-  if (network == 'custom') {
-    return Address.fromString(addressByNetwork.custom);
-  } else if (network == 'fantom') {
-    return Address.fromString(addressByNetwork.fantom);
+  network = network.replace('-', '');
+  if (network == 'taikokatla') {
+    return Address.fromString(addressByNetwork.taikokatla);
   } else {
-    return Address.fromString(addressByNetwork.canonical);
+    throw new Error('Unsupported network: ' + network);
   }
 }
 
