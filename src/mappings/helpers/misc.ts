@@ -19,7 +19,7 @@ import { WeightedPool } from '../../types/Vault/WeightedPool';
 import { Swap as SwapEvent, Vault } from '../../types/Vault/Vault';
 import { ONE_BD, SWAP_IN, SWAP_OUT, VAULT_ADDRESS, ZERO, ZERO_ADDRESS, ZERO_BD } from './constants';
 import { PoolType, getPoolAddress, isComposableStablePool } from './pools';
-import { ComposableStablePool } from '../../types/ComposableStablePoolFactory/ComposableStablePool';
+import { ComposableStablePool } from '../../types/ComposableStablePoolV6Factory/ComposableStablePool';
 import { valueInUSD } from '../pricing';
 
 const DAY = 24 * 60 * 60;

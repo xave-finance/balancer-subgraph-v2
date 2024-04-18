@@ -18,7 +18,7 @@ import {
   loadPoolToken,
   scaleDown,
 } from './helpers/misc';
-import { AaveLinearPool } from '../types/AaveLinearPoolFactory/AaveLinearPool';
+// import { AaveLinearPool } from '../types/AaveLinearPoolV5Factory/AaveLinearPool';
 import {
   FX_ASSET_AGGREGATORS,
   MAX_POS_PRICE_CHANGE,
@@ -171,7 +171,7 @@ export function updatePoolLiquidity(poolId: string, block_number: BigInt, timest
   // We want to avoid too frequently calling setWrappedTokenPrice because it makes a call to the rate provider
   // Doing it here allows us to do it only once, when the MIN_POOL_LIQUIDITY threshold is crossed
   if (oldPoolLiquidity < MIN_POOL_LIQUIDITY) {
-    setWrappedTokenPrice(pool, poolId, block_number, timestamp);
+    // setWrappedTokenPrice(pool, poolId, block_number, timestamp);
   }
 
   // update BPT price
@@ -279,6 +279,7 @@ export function getLatestPriceId(tokenAddress: Address, pricingAsset: Address): 
 }
 
 export function updateLatestPrice(tokenPrice: TokenPrice, blockTimestamp: BigInt): void {
+  log.warning('updateLatestPrice {}', [tokenPrice.price.toString()]);
   let tokenAddress = Address.fromString(tokenPrice.asset.toHexString());
   let pricingAsset = Address.fromString(tokenPrice.pricingAsset.toHexString());
 
@@ -339,35 +340,35 @@ export function isUSDStable(asset: Address): boolean {
 // The wrapped token in a linear pool is hardly ever traded, meaning we rarely compute its USD price
 // This creates an exceptional entry for the token price of the wrapped token,
 // with the main token as the pricing asset even if it's not globally defined as one
-export function setWrappedTokenPrice(pool: Pool, poolId: string, block_number: BigInt, timestamp: BigInt): void {
-  if (isLinearPool(pool)) {
-    if (pool.totalLiquidity.gt(MIN_POOL_LIQUIDITY)) {
-      const poolAddress = bytesToAddress(pool.address);
-      let poolContract = AaveLinearPool.bind(poolAddress);
-      let rateCall = poolContract.try_getWrappedTokenRate();
-      if (rateCall.reverted) {
-        log.info('getWrappedTokenRate reverted', []);
-      } else {
-        const rate = rateCall.value;
-        const amount = BigDecimal.fromString('1');
-        const asset = bytesToAddress(pool.tokensList[pool.wrappedIndex]);
-        const pricingAsset = bytesToAddress(pool.tokensList[pool.mainIndex]);
-        const price = scaleDown(rate, 18);
-        let tokenPriceId = getTokenPriceId(poolId, asset, pricingAsset, block_number);
-        let tokenPrice = new TokenPrice(tokenPriceId);
-        tokenPrice.poolId = poolId;
-        tokenPrice.block = block_number;
-        tokenPrice.timestamp = timestamp.toI32();
-        tokenPrice.asset = asset;
-        tokenPrice.pricingAsset = pricingAsset;
-        tokenPrice.amount = amount;
-        tokenPrice.price = price;
-        tokenPrice.save();
-        updateLatestPrice(tokenPrice, timestamp);
-      }
-    }
-  }
-}
+// export function setWrappedTokenPrice(pool: Pool, poolId: string, block_number: BigInt, timestamp: BigInt): void {
+//   if (isLinearPool(pool)) {
+//     if (pool.totalLiquidity.gt(MIN_POOL_LIQUIDITY)) {
+//       const poolAddress = bytesToAddress(pool.address);
+//       let poolContract = AaveLinearPool.bind(poolAddress);
+//       let rateCall = poolContract.try_getWrappedTokenRate();
+//       if (rateCall.reverted) {
+//         log.info('getWrappedTokenRate reverted', []);
+//       } else {
+//         const rate = rateCall.value;
+//         const amount = BigDecimal.fromString('1');
+//         const asset = bytesToAddress(pool.tokensList[pool.wrappedIndex]);
+//         const pricingAsset = bytesToAddress(pool.tokensList[pool.mainIndex]);
+//         const price = scaleDown(rate, 18);
+//         let tokenPriceId = getTokenPriceId(poolId, asset, pricingAsset, block_number);
+//         let tokenPrice = new TokenPrice(tokenPriceId);
+//         tokenPrice.poolId = poolId;
+//         tokenPrice.block = block_number;
+//         tokenPrice.timestamp = timestamp.toI32();
+//         tokenPrice.asset = asset;
+//         tokenPrice.pricingAsset = pricingAsset;
+//         tokenPrice.amount = amount;
+//         tokenPrice.price = price;
+//         tokenPrice.save();
+//         updateLatestPrice(tokenPrice, timestamp);
+//       }
+//     }
+//   }
+// }
 
 export function handleAnswerUpdated(event: AnswerUpdated): void {
   const aggregatorAddress = event.address;

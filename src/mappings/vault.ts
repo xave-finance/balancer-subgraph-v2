@@ -43,7 +43,7 @@ import {
   getPreferentialPricingAsset,
   updateLatestPrice,
   updatePoolLiquidity,
-  setWrappedTokenPrice,
+  // setWrappedTokenPrice,
 } from './pricing';
 import {
   MIN_POOL_LIQUIDITY,
@@ -457,7 +457,7 @@ export function handleBalanceManage(event: PoolBalanceManaged): void {
   management.timestamp = event.block.timestamp.toI32();
   management.save();
 
-  setWrappedTokenPrice(pool, poolId.toHex(), event.block.number, event.block.timestamp);
+  // setWrappedTokenPrice(pool, poolId.toHex(), event.block.number, event.block.timestamp);
 }
 
 /************************************
@@ -465,6 +465,7 @@ export function handleBalanceManage(event: PoolBalanceManaged): void {
  ************************************/
 export function handleSwapEvent(event: SwapEvent): void {
   createUserEntity(event.transaction.from);
+
   let poolId = event.params.poolId;
 
   let pool = Pool.load(poolId.toHexString());
@@ -665,6 +666,10 @@ export function handleSwapEvent(event: SwapEvent): void {
   tradePairSnapshot.save();
 
   if (swap.tokenAmountOut == ZERO_BD || swap.tokenAmountIn == ZERO_BD) {
+    log.warning('handleSwapEvent tokenAmountOut == 0 {} {}', [
+      tokenInAddress.toHexString(),
+      tokenOutAddress.toHexString(),
+    ]);
     return;
   }
 

@@ -62,7 +62,7 @@ import { getPoolTokenManager, getPoolTokens } from './helpers/pools';
 import {
   ProtocolFeePercentageCacheUpdated,
   RecoveryModeStateChanged,
-} from '../types/WeightedPoolV2Factory/WeightedPoolV2';
+} from '../types/WeightedPoolV4Factory/WeightedPoolV2';
 import { PausedLocally, UnpausedLocally } from '../types/templates/Gyro2Pool/Gyro2V2Pool';
 import { WeightedPoolV2 } from '../types/templates/WeightedPoolV2/WeightedPoolV2';
 import { Transfer } from '../types/Vault/ERC20';
