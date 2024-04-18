@@ -19,8 +19,10 @@ yarn generate-assets katla && \
   yarn generate-manifests && \
   cp subgraph.katla.full.yaml subgraph.yaml && \
   yarn build && \
-  goldsky subgraph delete test-katla/0.0.1 && \
-  goldsky subgraph deploy test-katla/0.0.1 --path .
+  goldsky subgraph delete andrei-test-katla/0.0.1 && \
+  goldsky subgraph deploy andrei-test-katla/0.0.1 --path .
+  # goldsky subgraph delete test-katla/0.0.1 && \
+  # goldsky subgraph deploy test-katla/0.0.1 --path .
 
 # list subgraphs
 goldsky subgraph list

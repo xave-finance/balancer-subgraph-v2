@@ -541,6 +541,11 @@ export function handleSwapEvent(event: SwapEvent): void {
   // we defined two variables: 1. valueUSD - the value in USD of the transaction;
   // 2. swapValueUSD - equal to valueUSD if trade, zero otherwise, and used to update metrics.
   const valueUSD = swapValueInUSD(tokenInAddress, tokenAmountIn, tokenOutAddress, tokenAmountOut);
+  log.info('=====handleSwapEvent: (tokenIn: {}), (tokenOut: {}): valueUSD: {}', [
+    tokenInAddress.toHexString(),
+    tokenOutAddress.toHexString(),
+    valueUSD.toString(),
+  ]);
 
   if (poolAddress != tokenInAddress && poolAddress != tokenOutAddress) {
     swapValueUSD = valueUSD;

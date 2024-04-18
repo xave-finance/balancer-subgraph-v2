@@ -1,6 +1,6 @@
 import { LogArgument } from '../types/EventEmitter/EventEmitter';
 import { Pool, Token } from '../types/schema';
-import { BigDecimal } from '@graphprotocol/graph-ts';
+import { BigDecimal, log } from '@graphprotocol/graph-ts';
 import { computeCuratedSwapEnabled } from './helpers/misc';
 import { poolTypes } from './helpers/pools';
 
@@ -51,8 +51,13 @@ function setLatestUSDPrice(event: LogArgument): void {
    * @param value - token price in cents of USD (ie, a value of 1 represents $0.01)
    */ //
   const tokenAddress = event.params.message.toHexString();
+  log.info('=====setLatestUSDPrice - tokenAddress: {}', [tokenAddress]);
+
   const token = Token.load(tokenAddress);
-  if (!token) return;
+  if (!token) {
+    log.info('=====setLatestUSDPrice NO TOKEN', []);
+    return;
+  }
 
   const base = BigDecimal.fromString('100');
   token.latestUSDPrice = event.params.value.toBigDecimal().div(base);

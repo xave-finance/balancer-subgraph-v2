@@ -23,12 +23,14 @@ import {
 import { updatePoolWeights } from './helpers/weighted';
 import { Vault } from '../types/Vault/Vault';
 
-import { BigInt, Address, Bytes, ethereum } from '@graphprotocol/graph-ts';
+import { BigInt, Address, Bytes, ethereum, log } from '@graphprotocol/graph-ts';
+
 import { PoolCreated } from '../types/WeightedPoolFactory/WeightedPoolFactory';
 import { AaveLinearPoolCreated } from '../types/AaveLinearPoolV3Factory/AaveLinearPoolV3Factory';
 import { ProtocolIdRegistered } from '../types/ProtocolIdRegistry/ProtocolIdRegistry';
 import { Balancer, Pool, PoolContract, ProtocolIdData } from '../types/schema';
 import { KassandraPoolCreated } from '../types/ManagedKassandraPoolControllerFactory/ManagedKassandraPoolControllerFactory';
+import { NewFXPoolDeployer } from '../types/FXPoolDeployerTracker/FXPoolDeployerTracker';
 
 // datasource
 import { OffchainAggregator, WeightedPool as WeightedPoolTemplate } from '../types/templates';
@@ -47,6 +49,7 @@ import { Gyro2Pool as Gyro2PoolTemplate } from '../types/templates';
 import { Gyro3Pool as Gyro3PoolTemplate } from '../types/templates';
 import { GyroEPool as GyroEPoolTemplate } from '../types/templates';
 import { FXPool as FXPoolTemplate } from '../types/templates';
+import { FXPoolDeployer as FXPoolDeployerTemplate } from '../types/templates';
 
 import { WeightedPool } from '../types/templates/WeightedPool/WeightedPool';
 import { WeightedPoolV2 } from '../types/templates/WeightedPoolV2/WeightedPoolV2';
@@ -59,6 +62,8 @@ import { GyroEV2Pool } from '../types/templates/GyroEPool/GyroEV2Pool';
 import { FXPool } from '../types/templates/FXPool/FXPool';
 import { Assimilator } from '../types/FXPoolDeployer/Assimilator';
 import { ChainlinkPriceFeed } from '../types/FXPoolDeployer/ChainlinkPriceFeed';
+import { OunceToGramOracle } from '../types/templates/FXPoolDeployer/OunceToGramOracle';
+import { AggregatorConverter } from '../types/templates/FXPoolDeployer/AggregatorConverter';
 import { Transfer } from '../types/Vault/ERC20';
 import { handleTransfer, setPriceRateProvider } from './poolController';
 import { ComposableStablePool } from '../types/ComposableStablePoolFactory/ComposableStablePool';
@@ -216,6 +221,484 @@ export function handleNewHighAmpComposableStablePool(event: PoolCreated): void {
   const pool = createStableLikePool(event, PoolType.HighAmpComposableStable);
   if (pool == null) return;
   StablePhantomPoolV2Template.create(event.params.pool);
+}
+
+export function handleNewCCPPool(event: PoolCreated): void {
+  let poolAddress: Address = event.params.pool;
+
+  let poolContract = ConvergentCurvePool.bind(poolAddress);
+
+  let poolIdCall = poolContract.try_getPoolId();
+  let poolId = poolIdCall.value;
+
+  let swapFeeCall = poolContract.try_percentFee();
+  let swapFee = swapFeeCall.value;
+
+  let principalTokenCall = poolContract.try_bond();
+  let principalToken = principalTokenCall.value;
+
+  let baseTokenCall = poolContract.try_underlying();
+  let baseToken = baseTokenCall.value;
+
+  let expiryTimeCall = poolContract.try_expiration();
+  let expiryTime = expiryTimeCall.value;
+
+  let unitSecondsCall = poolContract.try_unitSeconds();
+  let unitSeconds = unitSecondsCall.value;
+
+  // let ownerCall = poolContract.try_getOwner();
+  // let owner = ownerCall.value;
+
+  let pool = handleNewPool(event, poolId, swapFee);
+  pool.poolType = PoolType.Element; // pool.owner = owner;
+  pool.principalToken = principalToken;
+  pool.baseToken = baseToken;
+  pool.expiryTime = expiryTime;
+  pool.unitSeconds = unitSeconds;
+
+  let tokens = getPoolTokens(poolId);
+  if (tokens == null) return;
+  pool.tokensList = tokens;
+
+  pool.save();
+
+  handleNewPoolTokens(pool, tokens);
+
+  CCPoolTemplate.create(poolAddress);
+}
+
+export function handleNewAaveLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.AaveLinear);
+}
+
+export function handleNewAaveLinearPoolV2(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.AaveLinear, 2);
+}
+
+export function handleNewAaveLinearPoolV3(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.AaveLinear, 3);
+}
+
+export function handleNewAaveLinearPoolV4(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.AaveLinear, 4);
+}
+
+export function handleNewAaveLinearPoolV5(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.AaveLinear, 5);
+}
+
+export function handleNewERC4626LinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.ERC4626Linear);
+}
+
+export function handleNewERC4626LinearPoolV3(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.ERC4626Linear, 3);
+}
+
+export function handleNewERC4626LinearPoolV4(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.ERC4626Linear, 4);
+}
+
+export function handleNewEulerLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.EulerLinear, 1);
+}
+
+export function handleNewGearboxLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.GearboxLinear, 1);
+}
+
+export function handleNewGearboxLinearPoolV2(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.GearboxLinear, 2);
+}
+
+export function handleNewMidasLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.EulerLinear, 1);
+}
+
+export function handleNewReaperLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.ReaperLinear, 1);
+}
+
+export function handleNewReaperLinearPoolV2(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.ReaperLinear, 2);
+}
+
+export function handleNewReaperLinearPoolV3(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.ReaperLinear, 3);
+}
+
+export function handleNewSiloLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.SiloLinear, 1);
+}
+
+export function handleNewSiloLinearPoolV2(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.SiloLinear, 2);
+}
+
+export function handleNewYearnLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.YearnLinear, 1);
+}
+
+export function handleNewYearnLinearPoolV2(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.YearnLinear, 2);
+}
+
+export function handleNewBooLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.BooLinear, 1);
+}
+
+export function handleNewBooLinearPoolV2(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.BooLinear, 2);
+}
+
+export function handleNewTarotLinearPool(event: PoolCreated): void {
+  handleNewLinearPool(event, PoolType.TarotLinear, 1);
+}
+
+export function handleLinearPoolProtocolId(event: AaveLinearPoolCreated): void {
+  let poolAddress = event.params.pool;
+  let poolContract = PoolContract.load(poolAddress.toHexString());
+  if (poolContract == null) return;
+
+  let pool = Pool.load(poolContract.pool) as Pool;
+  pool.protocolId = event.params.protocolId.toI32();
+  const protocolIdData = ProtocolIdData.load(event.params.protocolId.toString());
+  pool.protocolIdData = protocolIdData ? protocolIdData.id : null;
+  pool.save();
+}
+
+function handleNewLinearPool(event: PoolCreated, poolType: string, poolTypeVersion: i32 = 1): void {
+  let poolAddress: Address = event.params.pool;
+
+  let poolContract = LinearPool.bind(poolAddress);
+
+  let poolIdCall = poolContract.try_getPoolId();
+  let poolId = poolIdCall.value;
+
+  let swapFeeCall = poolContract.try_getSwapFeePercentage();
+  let swapFee = swapFeeCall.value;
+
+  let pool = handleNewPool(event, poolId, swapFee);
+
+  pool.poolType = poolType;
+  pool.poolTypeVersion = poolTypeVersion;
+
+  let mainIndexCall = poolContract.try_getMainIndex();
+  pool.mainIndex = mainIndexCall.value.toI32();
+  let wrappedIndexCall = poolContract.try_getWrappedIndex();
+  pool.wrappedIndex = wrappedIndexCall.value.toI32();
+
+  let targetsCall = poolContract.try_getTargets();
+  pool.lowerTarget = tokenToDecimal(targetsCall.value.value0, 18);
+  pool.upperTarget = tokenToDecimal(targetsCall.value.value1, 18);
+
+  let tokens = getPoolTokens(poolId);
+  if (tokens == null) return;
+  pool.tokensList = tokens;
+
+  // Linear pools premint a large amount of BPTs on creation. This value will be added to totalShares
+  // on the handleTransfer handler, so we need to subtract it here
+  let preMintedBpt = BigInt.fromString('5192296858534827628530496329220095');
+  let scaledPreMintedBpt = scaleDown(preMintedBpt, 18);
+  pool.totalShares = pool.totalShares.minus(scaledPreMintedBpt);
+  // This amount will also be transferred to the vault,
+  // causing the vault's 'user shares' to incorrectly increase,
+  // so we need to negate it. We do so by processing a mock transfer event
+  // from the vault to the zero address
+
+  let mockEvent = new Transfer(
+    bytesToAddress(pool.address),
+    event.logIndex,
+    event.transactionLogIndex,
+    event.logType,
+    event.block,
+    event.transaction,
+    [
+      new ethereum.EventParam('from', ethereum.Value.fromAddress(VAULT_ADDRESS)),
+      new ethereum.EventParam('to', ethereum.Value.fromAddress(ZERO_ADDRESS)),
+      new ethereum.EventParam('value', ethereum.Value.fromUnsignedBigInt(preMintedBpt)),
+    ],
+    event.receipt
+  );
+  handleTransfer(mockEvent);
+  pool.save();
+
+  handleNewPoolTokens(pool, tokens);
+
+  LinearPoolTemplate.create(poolAddress);
+}
+
+function createGyro2Pool(event: PoolCreated, poolTypeVersion: i32 = 1): void {
+  let poolAddress: Address = event.params.pool;
+
+  let poolContract = Gyro2V2Pool.bind(poolAddress);
+
+  let poolIdCall = poolContract.try_getPoolId();
+  let poolId = poolIdCall.value;
+
+  let swapFeeCall = poolContract.try_getSwapFeePercentage();
+  let swapFee = swapFeeCall.value;
+
+  let pool = handleNewPool(event, poolId, swapFee);
+
+  pool.poolType = PoolType.Gyro2;
+  pool.poolTypeVersion = poolTypeVersion;
+  let sqrtParamsCall = poolContract.try_getSqrtParameters();
+  pool.sqrtAlpha = scaleDown(sqrtParamsCall.value[0], 18);
+  pool.sqrtBeta = scaleDown(sqrtParamsCall.value[1], 18);
+
+  let tokens = getPoolTokens(poolId);
+  if (tokens == null) return;
+  pool.tokensList = tokens;
+
+  if (poolTypeVersion == 2) {
+    let rateProvider0Call = poolContract.try_rateProvider0();
+    let rateProvider1Call = poolContract.try_rateProvider1();
+
+    let blockTimestamp = event.block.timestamp.toI32();
+
+    if (!rateProvider0Call.reverted) {
+      setPriceRateProvider(poolId.toHex(), changetype<Address>(tokens[0]), rateProvider0Call.value, 0, blockTimestamp);
+    }
+    if (!rateProvider1Call.reverted) {
+      setPriceRateProvider(poolId.toHex(), changetype<Address>(tokens[1]), rateProvider1Call.value, 0, blockTimestamp);
+    }
+  }
+
+  pool.save();
+
+  handleNewPoolTokens(pool, tokens);
+
+  Gyro2PoolTemplate.create(event.params.pool);
+}
+
+export function handleNewGyro2Pool(event: PoolCreated): void {
+  createGyro2Pool(event);
+}
+
+export function handleNewGyro2V2Pool(event: PoolCreated): void {
+  createGyro2Pool(event, 2);
+}
+
+export function handleNewGyro3Pool(event: PoolCreated): void {
+  let poolAddress: Address = event.params.pool;
+
+  let poolContract = Gyro3Pool.bind(poolAddress);
+
+  let poolIdCall = poolContract.try_getPoolId();
+  let poolId = poolIdCall.value;
+
+  let swapFeeCall = poolContract.try_getSwapFeePercentage();
+  let swapFee = swapFeeCall.value;
+
+  let pool = handleNewPool(event, poolId, swapFee);
+
+  pool.poolType = PoolType.Gyro3;
+  let root3AlphaCall = poolContract.try_getRoot3Alpha();
+
+  if (!root3AlphaCall.reverted) {
+    pool.root3Alpha = scaleDown(root3AlphaCall.value, 18);
+  }
+
+  let tokens = getPoolTokens(poolId);
+  if (tokens == null) return;
+  pool.tokensList = tokens;
+
+  pool.save();
+
+  handleNewPoolTokens(pool, tokens);
+
+  Gyro3PoolTemplate.create(event.params.pool);
+}
+
+function createGyroEPool(event: PoolCreated, poolTypeVersion: i32 = 1): void {
+  let poolAddress: Address = event.params.pool;
+  let poolContract = GyroEV2Pool.bind(poolAddress);
+
+  let poolIdCall = poolContract.try_getPoolId();
+  let poolId = poolIdCall.value;
+
+  let swapFeeCall = poolContract.try_getSwapFeePercentage();
+  let swapFee = swapFeeCall.value;
+
+  let pool = handleNewPool(event, poolId, swapFee);
+
+  pool.poolType = PoolType.GyroE;
+  pool.poolTypeVersion = poolTypeVersion;
+  let eParamsCall = poolContract.try_getECLPParams();
+
+  if (!eParamsCall.reverted) {
+    const params = eParamsCall.value.value0;
+    const derived = eParamsCall.value.value1;
+    pool.alpha = scaleDown(params.alpha, 18);
+    pool.beta = scaleDown(params.beta, 18);
+    pool.c = scaleDown(params.c, 18);
+    pool.s = scaleDown(params.s, 18);
+    pool.lambda = scaleDown(params.lambda, 18);
+
+    // terms in the 'derived' object are stored in extra precision (38 decimals) with final decimal rounded down
+    pool.tauAlphaX = scaleDown(derived.tauAlpha.x, 38);
+    pool.tauAlphaY = scaleDown(derived.tauAlpha.y, 38);
+    pool.tauBetaX = scaleDown(derived.tauBeta.x, 38);
+    pool.tauBetaY = scaleDown(derived.tauBeta.y, 38);
+    pool.u = scaleDown(derived.u, 38);
+    pool.v = scaleDown(derived.v, 38);
+    pool.w = scaleDown(derived.w, 38);
+    pool.z = scaleDown(derived.z, 38);
+    pool.dSq = scaleDown(derived.dSq, 38);
+  }
+
+  let tokens = getPoolTokens(poolId);
+  if (tokens == null) return;
+  pool.tokensList = tokens;
+
+  if (poolTypeVersion == 2) {
+    let rateProvider0Call = poolContract.try_rateProvider0();
+    let rateProvider1Call = poolContract.try_rateProvider1();
+
+    let blockTimestamp = event.block.timestamp.toI32();
+
+    if (!rateProvider0Call.reverted) {
+      setPriceRateProvider(poolId.toHex(), changetype<Address>(tokens[0]), rateProvider0Call.value, 0, blockTimestamp);
+    }
+    if (!rateProvider1Call.reverted) {
+      setPriceRateProvider(poolId.toHex(), changetype<Address>(tokens[1]), rateProvider1Call.value, 0, blockTimestamp);
+    }
+  }
+
+  pool.save();
+
+  handleNewPoolTokens(pool, tokens);
+
+  GyroEPoolTemplate.create(event.params.pool);
+}
+
+export function handleNewGyroEPool(event: PoolCreated): void {
+  createGyroEPool(event);
+}
+
+export function handleNewGyroEV2Pool(event: PoolCreated): void {
+  createGyroEPool(event, 2);
+}
+
+export function handleNewFXPoolDeployer(event: NewFXPoolDeployer): void {
+  FXPoolDeployerTemplate.create(event.params.deployer);
+}
+
+export function handleNewFXPoolV1(event: ethereum.Event): void {
+  return handleNewFXPool(event, false);
+}
+
+export function handleNewFXPoolV2(event: ethereum.Event): void {
+  return handleNewFXPool(event, true);
+}
+
+function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
+  /**
+   * FXPoolFactory/FXPoolDeployer emits a custom NewFXPool event with the following params:
+   *   event.parameters[0] = caller
+   *   event.parameters[1] = id (vault poolId)
+   *   event.parameters[2] = fxpool (pool address)
+   * */
+  let poolId = event.parameters[1].value.toBytes();
+  let poolAddress = event.parameters[2].value.toAddress();
+  let swapFee = ZERO; // fee is calculated on every swap
+
+  // Create a PoolCreated event from generic ethereum.Event
+  const poolCreatedEvent = new PoolCreated(
+    event.address,
+    event.logIndex,
+    event.transactionLogIndex,
+    event.logType,
+    event.block,
+    event.transaction,
+    [event.parameters[2]], // PoolCreated expects parameters[0] to be the pool address
+    event.receipt
+  );
+
+  let pool = handleNewPool(poolCreatedEvent, poolId, swapFee);
+
+  pool.poolType = PoolType.FX;
+
+  let tokens = getPoolTokens(poolId);
+  if (tokens == null) return;
+  pool.tokensList = tokens;
+
+  pool.save();
+
+  handleNewPoolTokens(pool, tokens);
+
+  FXPoolTemplate.create(poolAddress);
+
+  // Create templates for each token Offchain Aggregator
+  let tokensAddresses: Address[] = changetype<Address[]>(tokens);
+
+  if (!permissionless) {
+    // For FXPoolFactory, use hardcoded aggregator addresses
+    tokensAddresses.forEach((tokenAddress) => {
+      for (let i = 0; i < FX_ASSET_AGGREGATORS.length; i++) {
+        if (FX_ASSET_AGGREGATORS[i][0] == tokenAddress) {
+          OffchainAggregator.create(FX_ASSET_AGGREGATORS[i][1]);
+          break;
+        }
+      }
+    });
+  } else {
+    // For FXPoolDeployer (permissionless), fetch the aggregator address dynamically
+    let poolContract = FXPool.bind(poolAddress);
+
+    for (let i = 0; i < tokensAddresses.length; i++) {
+      let tokenAddress = tokensAddresses[i];
+      let assimCall = poolContract.try_assimilator(tokenAddress);
+      if (assimCall.reverted) continue;
+
+      let assimContract = Assimilator.bind(assimCall.value);
+      let oracleCall = assimContract.try_oracle();
+      if (oracleCall.reverted) continue;
+
+      let oracleContract = ChainlinkPriceFeed.bind(oracleCall.value);
+      let aggregatorCall = oracleContract.try_aggregator();
+      if (aggregatorCall.reverted) continue;
+
+      // Create OffchainAggregator template
+      let aggregatorAddress = aggregatorCall.value;
+      OffchainAggregator.create(aggregatorAddress);
+
+      // Update FXOracle supported tokens
+      let oracle = getFXOracle(aggregatorAddress);
+      let tokenAddresses = oracle.tokens;
+      const tokenExists = tokenAddresses.includes(tokenAddress);
+      if (!tokenExists) {
+        tokenAddresses.push(tokenAddress);
+      }
+
+      // some oracles have a conversion rate
+      // eg. metal token oracles like Gold tokens are expressed in grams but the Chainlink
+      // oracle returns the price in troy ounces. We need to convert the price to grams
+      const gramPerTroyOunceCall = OunceToGramOracle.bind(oracleCall.value).try_GRAM_PER_TROYOUNCE();
+      if (!gramPerTroyOunceCall.reverted) {
+        // VNXAUGramOracle.sol oracle convertor (deprecated)
+        oracle.decimals = BigInt.fromString('8').toI32();
+        oracle.divisor = gramPerTroyOunceCall.value.toString();
+      } else {
+        // AggregatorConverter (current version)
+        // if the Oracle contract has a DIVISOR and DECIMALS function, it is an AggregatorConverter contract
+        const aggregatorConverterDivisorCall = AggregatorConverter.bind(oracleCall.value).try_DIVISOR();
+        if (!aggregatorConverterDivisorCall.reverted) {
+          const divisor = aggregatorConverterDivisorCall.value;
+          const aggregatorConverterDecimalsCall = AggregatorConverter.bind(oracleCall.value).try_DECIMALS();
+          if (!aggregatorConverterDecimalsCall.reverted) {
+            const decimals = aggregatorConverterDecimalsCall.value;
+            oracle.decimals = decimals.toI32();
+            oracle.divisor = divisor.toString();
+          }
+        }
+      }
+
+      oracle.tokens = tokenAddresses;
+      oracle.save();
+    }
+  }
 }
 
 function findOrInitializeVault(): Balancer {
