@@ -1,0 +1,18 @@
+{
+  "stableAssets": [
+    {
+      "address": "0x94d81606Dca42D3680c0DFc1d93eeaF6C2D55f2d",
+      "symbol": "USDC"
+    },
+    {
+      "address": "0x6360a8Adb883CA076e7F2c6d2fF37531A771e414",
+      "symbol": "Mock_USDT"
+    },
+    {
+      "address": "0xe5d80E9A857BF5cc73e40144cb28c8a401BdAe0c",
+      "symbol": "Mock_DAI"
+    }
+  ],
+  "pricingAssets": [],
+  "fxAssetAggregators": []
+}

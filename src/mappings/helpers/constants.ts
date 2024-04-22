@@ -34,6 +34,7 @@ export let PRICING_ASSETS = assets.stableAssets.concat(assets.pricingAssets);
 
 class AddressByNetwork {
   public taikokatla: string;
+  public berachainpublictestnet: string;
 }
 
 let network: string = dataSource.network();
@@ -44,12 +45,16 @@ let network: string = dataSource.network();
 // with a new entry for the new network - folowwing subgraph slugs
 let vaultAddressByNetwork: AddressByNetwork = {
   taikokatla: '0x5644c8baCef3F48652A21C6943E204fC4aEc8aA9',
+  berachainpublictestnet: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
 };
 
 function forNetwork(addressByNetwork: AddressByNetwork, network: string): Address {
-  network = network.replace('-', '');
+  // no `replaceAll` therefore two replaces
+  network = network.replace('-', '').replace('-', '');
   if (network == 'taikokatla') {
     return Address.fromString(addressByNetwork.taikokatla);
+  } else if (network == 'berachainpublictestnet') {
+    return Address.fromString(addressByNetwork.berachainpublictestnet);
   } else {
     throw new Error('Unsupported network: ' + network);
   }
