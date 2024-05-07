@@ -1,18 +1,39 @@
 {
   "stableAssets": [
     {
-      "address": "0xdEfC97Ef038f3fe7e179a7FaDE96cc477037812E",
+      "address": "0x3481c2314E4D15603A05Ee7e6BE25fcE4B128a5c",
       "symbol": "USDC"
     },
     {
-      "address": "0x0A395bC66d0A86b37C111652aE6228cd65F178C4",
-      "symbol": "Mock_USDT"
-    },
-    {
-      "address": "0x63064565EA69E0CaBFBF225F14058f76B4cECfb8",
+      "address": "0x9f555A3115C2Da9574c84C4Dfb1617193aA7AFE2",
       "symbol": "Mock_DAI"
     }
   ],
   "pricingAssets": [],
-  "fxAssetAggregators": []
+  "fxAssetAggregators": [
+    {
+      "asset": "0x3481c2314E4D15603A05Ee7e6BE25fcE4B128a5c",
+      "assetSymbol": "USDC",
+      "aggregator": "0x8Ac6F66307d1bcFBb4a7b7d4EB86b36b644192Ca",
+      "aggregatorSymbol": "USDC/USD"
+    },
+    {
+      "asset": "0xf7E8Ab78dC91a4FdDA1DFba6c81bAF1870d2D957",
+      "assetSymbol": "XSGD",
+      "aggregator": "0x59847B1314E1A1cad9E0a207F6E53c04F4FAbFBD",
+      "aggregatorSymbol": "SGD/USD"
+    },
+    {
+      "asset": "0x48623292bD8293b747571934379B9D3E5423DBB6",
+      "assetSymbol": "EURS",
+      "aggregator": "0xf5b0b3b50328B2595BC6a31A526A8A3568CEa42d",
+      "aggregatorSymbol": "EUR/USD"
+    },
+    {
+      "asset": "0x9f555A3115C2Da9574c84C4Dfb1617193aA7AFE2",
+      "assetSymbol": "DAI",
+      "aggregator": "0x8Ac6F66307d1bcFBb4a7b7d4EB86b36b644192Ca",
+      "aggregatorSymbol": "USDC/USD"
+    }
+  ]
 }

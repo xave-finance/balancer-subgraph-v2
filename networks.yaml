@@ -34,32 +34,35 @@ artio:
 katla:
   network: taiko-katla
   EventEmitter:
-    address: "0x1ACfEEA57d2ac674d7E65964f155AB9348A6C290"
-    startBlock: 766963
+    address: "0xc104e54803abA12f7a171a49DDC333Da39f47193"
+    startBlock: 1060476
   Vault:
-    address: "0x5644c8baCef3F48652A21C6943E204fC4aEc8aA9"
-    startBlock: 766963
+    address: "0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba"
+    startBlock: 1060476
   ProtocolFeesCollector:
-    address: "0x0A1f23a241145F03C0e6870419f7fE1EF0f8D730"
-    startBlock: 766963
+    address: "0x2e6AA3397607AcFa64b9b16f54b5F0293405C861"
+    startBlock: 1060476
   BalancerQueries:
-    address: "0x331DC7A64A8F7874C032434E179573421b2d7135"
-    startBlock: 766963
+    address: "0x4E5b866564AC8695097e881f5CA86B2074BE7857"
+    startBlock: 1060476
   ProtocolFeePercentagesProvider:
-    address: "0x96cedc58b95149DD0Fb535C3bBd5F43892Ed3F08"
-    startBlock: 766963
+    address: "0x7965Ce7bE2B1608c217D001BdC27B799e405cf2F"
+    startBlock: 1060476
   WeightedPoolV4Factory:
-    address: "0x09D52F5B9E6f1682d3c449b612c421b598666238"
-    startBlock: 766963
+    address: "0x3D0f0422aa3afD4F00F71c7A606b5d7Bf231E571"
+    startBlock: 1060476
   BalancerPoolDataQueries:
-    address: "0xc41F5451ECaf22800FD52d4601C0cE69aeE4D4b3"
-    startBlock: 766963
+    address: "0x0A395bC66d0A86b37C111652aE6228cd65F178C4"
+    startBlock: 1060476
   ComposableStablePoolV6Factory:
-    address: "0xBc72894beef4de732f60dE2EBAdF8dD9E4C89B6f"
-    startBlock: 766963
+    address: "0x63064565EA69E0CaBFBF225F14058f76B4cECfb8"
+    startBlock: 1060476
   AaveLinearPoolV5Factory:
-    address: "0x254e3D5F964E770F3a51a19d809bcE36308d797d"
-    startBlock: 766963
+    address: "0x51440C7d318Dd61A5e76053084cC591Be8D6574b"
+    startBlock: 1060476
+  FXPoolDeployerTracker:
+    address: "0x4159d4279BAc010ef4E4c1a7e085f6103956a95a"
+    startBlock: 1060476
 
 mainnet:
   network: mainnet
