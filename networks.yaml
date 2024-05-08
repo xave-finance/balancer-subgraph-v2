@@ -49,16 +49,16 @@ katla:
     address: "0x7965Ce7bE2B1608c217D001BdC27B799e405cf2F"
     startBlock: 1060476
   WeightedPoolV4Factory:
-    address: "0x3D0f0422aa3afD4F00F71c7A606b5d7Bf231E571"
+    address: "0xFc7F949E6a4c91Ad61924e4b316f6B59960FD5df"
     startBlock: 1060476
   BalancerPoolDataQueries:
-    address: "0x0A395bC66d0A86b37C111652aE6228cd65F178C4"
+    address: "0x764d0B2360b5e24f0f45BEEFb6d088346e67DaEc"
     startBlock: 1060476
   ComposableStablePoolV6Factory:
-    address: "0x63064565EA69E0CaBFBF225F14058f76B4cECfb8"
+    address: "0xAa878928dc095523300585155843Ae142FBf309d"
     startBlock: 1060476
   AaveLinearPoolV5Factory:
-    address: "0x51440C7d318Dd61A5e76053084cC591Be8D6574b"
+    address: "0x6bf91F40A553C58d8cD56871a6D3516F102785a8"
     startBlock: 1060476
   FXPoolDeployerTracker:
     address: "0x4159d4279BAc010ef4E4c1a7e085f6103956a95a"

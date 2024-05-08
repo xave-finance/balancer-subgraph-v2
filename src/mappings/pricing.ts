@@ -279,7 +279,7 @@ export function getLatestPriceId(tokenAddress: Address, pricingAsset: Address): 
 }
 
 export function updateLatestPrice(tokenPrice: TokenPrice, blockTimestamp: BigInt): void {
-  log.warning('updateLatestPrice {}', [tokenPrice.price.toString()]);
+  log.debug('updateLatestPrice {}', [tokenPrice.price.toString()]);
   let tokenAddress = Address.fromString(tokenPrice.asset.toHexString());
   let pricingAsset = Address.fromString(tokenPrice.pricingAsset.toHexString());
 

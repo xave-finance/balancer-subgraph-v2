@@ -34,6 +34,18 @@
       "assetSymbol": "DAI",
       "aggregator": "0x8Ac6F66307d1bcFBb4a7b7d4EB86b36b644192Ca",
       "aggregatorSymbol": "USDC/USD"
+    },
+    {
+      "asset": "0xE950eC7Fc508dd86fD9B36671f6B1602007D5B72",
+      "assetSymbol": "TXAU",
+      "aggregator": "0x15d10f0f4a1BF132883a09A4B415f4860271C0Cd",
+      "aggregatorSymbol": "XAU/USD"
+    },
+    {
+      "asset": "0xFA505d02269bF4Ea59355a4e37fBd882122717e5",
+      "assetSymbol": "VCHF",
+      "aggregator": "0xA8A70c9C8e9EcfB3fddF177103F31D710132c794",
+      "aggregatorSymbol": "CHF/USD"
     }
   ]
 }
