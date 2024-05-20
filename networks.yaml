@@ -28,7 +28,7 @@ artio:
     address: "0x51440C7d318Dd61A5e76053084cC591Be8D6574b"
     startBlock: 1676203
   FXPoolDeployerTracker:
-    address: "0x8D0b93D929115faA2499DCF6Cfc84123ff9DC5Cd"
+    address: "0x90c58D12b248d7054adcB5baad467dEb8e33ABcE"
     startBlock: 1797030
 
 katla:

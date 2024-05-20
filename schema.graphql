@@ -410,7 +410,7 @@ type FXOracle @entity {
   decimals: Int
 }
 
-# wrokaround for the Tracker not indexing by quote address
+# workaround for the Tracker not indexing by quote address
 type FXPoolDeployer @entity {
   id: ID! # FX pool deployer address
   quoteToken: Bytes! # token address
