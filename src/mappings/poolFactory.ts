@@ -27,7 +27,7 @@ import { BigInt, Address, Bytes, ethereum, log } from '@graphprotocol/graph-ts';
 import { PoolCreated } from '../types/WeightedPoolV4Factory/WeightedPoolFactory';
 import { AaveLinearPoolCreated } from '../types/AaveLinearPoolV5Factory/AaveLinearPoolV5Factory';
 // import { ProtocolIdRegistered } from '../types/ProtocolIdRegistry/ProtocolIdRegistry';
-import { Balancer, Pool, PoolContract, ProtocolIdData } from '../types/schema';
+import { Balancer, Pool, PoolContract, ProtocolIdData, FXPoolDeployer } from '../types/schema';
 // import { KassandraPoolCreated } from '../types/ManagedKassandraPoolControllerFactory/ManagedKassandraPoolControllerFactory';
 import { NewFXPoolDeployer } from '../types/FXPoolDeployerTracker/FXPoolDeployerTracker';
 
@@ -647,6 +647,9 @@ export function handleNewGyroEV2Pool(event: PoolCreated): void {
 
 export function handleNewFXPoolDeployer(event: NewFXPoolDeployer): void {
   FXPoolDeployerTemplate.create(event.params.deployer);
+  const poolDeployer = new FXPoolDeployer(event.params.deployer.toHexString());
+  poolDeployer.quoteToken = stringToBytes(event.params.quoteToken.toHexString());
+  poolDeployer.save();
 }
 
 // export function handleNewFXPoolV1(event: ethereum.Event): void {
