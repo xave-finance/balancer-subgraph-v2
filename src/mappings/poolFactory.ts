@@ -686,6 +686,7 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
   let pool = handleNewPool(poolCreatedEvent, poolId, swapFee);
 
   pool.poolType = PoolType.FX;
+  pool.quoteToken = getFXPoolQuoteToken(poolAddress);
 
   let tokens = getPoolTokens(poolId);
   if (tokens == null) return;
@@ -840,6 +841,18 @@ function handleNewPoolTokens(pool: Pool, tokens: Bytes[]): void {
 
     createPoolTokenEntity(pool, tokensAddresses[i], i, assetManager);
   }
+}
+
+// find the quote token in an FXPool
+function getFXPoolQuoteToken(poolAddress: Address): Bytes {
+  let poolContract = FXPool.bind(poolAddress);
+  // FXPool **always** holds the quote token in the second position
+  let quoteTokenCall = poolContract.try_derivatives(BigInt.fromI32(1));
+  if (quoteTokenCall.reverted) {
+    log.error('Failed to get quote token for FXPool: {}', [poolAddress.toHexString()]);
+    return stringToBytes('0x');
+  }
+  return quoteTokenCall.value;
 }
 
 // export function handleProtocolIdRegistryOrRename(event: ProtocolIdRegistered): void {

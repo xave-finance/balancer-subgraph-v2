@@ -121,6 +121,7 @@ type Pool @entity {
   # FXPool Only
   delta: BigDecimal
   epsilon: BigDecimal
+  quoteToken: Bytes
 
   # Composable and WeightedV2+ Only
   isInRecoveryMode: Boolean
