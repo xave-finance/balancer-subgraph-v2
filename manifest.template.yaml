@@ -2462,6 +2462,8 @@ templates:
           handler: handleTransfer
         - event: ParametersSet(uint256,uint256,uint256,uint256,uint256)
           handler: handleParametersSet
+        - event: ProtocolFeeShareUpdated(address,uint256)
+          handler: handleProtocolFeeShareUpdated
   - kind: ethereum/contract
     name: OffchainAggregator
     network: {{network}}

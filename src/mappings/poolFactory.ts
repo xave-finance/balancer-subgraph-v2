@@ -687,6 +687,7 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
 
   pool.poolType = PoolType.FX;
   pool.quoteToken = getFXPoolQuoteToken(poolAddress);
+  pool.protocolPercentFee = getFXPoolProtocolFee(poolAddress);
 
   let tokens = getPoolTokens(poolId);
   if (tokens == null) return;
@@ -847,12 +848,24 @@ function handleNewPoolTokens(pool: Pool, tokens: Bytes[]): void {
 function getFXPoolQuoteToken(poolAddress: Address): Bytes {
   let poolContract = FXPool.bind(poolAddress);
   // FXPool **always** holds the quote token in the second position
-  let quoteTokenCall = poolContract.try_derivatives(BigInt.fromI32(1));
-  if (quoteTokenCall.reverted) {
+  let call = poolContract.try_derivatives(BigInt.fromI32(1));
+  if (call.reverted) {
     log.error('Failed to get quote token for FXPool: {}', [poolAddress.toHexString()]);
     return stringToBytes('0x');
   }
-  return quoteTokenCall.value;
+  return call.value;
+}
+
+// find the quote token in an FXPool
+function getFXPoolProtocolFee(poolAddress: Address): i32 {
+  let poolContract = FXPool.bind(poolAddress);
+  // FXPool **always** holds the quote token in the second position
+  let call = poolContract.try_protocolPercentFee();
+  if (call.reverted) {
+    log.error('Failed to call protocolPercentFee for FXPool: {}', [poolAddress.toHexString()]);
+    return i32(parseInt('0'));
+  }
+  return i32(parseInt(call.value.toString()));
 }
 
 // export function handleProtocolIdRegistryOrRename(event: ProtocolIdRegistered): void {

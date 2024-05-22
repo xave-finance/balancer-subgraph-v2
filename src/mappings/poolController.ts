@@ -28,7 +28,7 @@ import {
   TokenRateCacheUpdated,
   TokenRateProviderSet,
 } from '../types/templates/StablePhantomPoolV2/ComposableStablePool';
-import { ParametersSet } from '../types/templates/FXPool/FXPool';
+import { ParametersSet, ProtocolFeeShareUpdated } from '../types/templates/FXPool/FXPool';
 import {
   Pool,
   PriceRateProvider,
@@ -704,5 +704,15 @@ export function handleParametersSet(event: ParametersSet): void {
   pool.delta = scaleDown(event.params.delta, 18);
   pool.epsilon = scaleDown(event.params.epsilon, 18);
   pool.lambda = scaleDown(event.params.lambda, 18);
+  pool.save();
+}
+
+export function handleProtocolFeeShareUpdated(event: ProtocolFeeShareUpdated): void {
+  let poolAddress = event.address;
+  let poolContract = PoolContract.load(poolAddress.toHexString());
+  if (poolContract == null) return;
+
+  let pool = Pool.load(poolContract.pool) as Pool;
+  pool.protocolPercentFee = i32(parseInt(event.params.newProtocolPercentage.toString()));
   pool.save();
 }

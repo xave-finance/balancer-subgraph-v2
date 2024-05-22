@@ -122,6 +122,7 @@ type Pool @entity {
   delta: BigDecimal
   epsilon: BigDecimal
   quoteToken: Bytes
+  protocolPercentFee: Int
 
   # Composable and WeightedV2+ Only
   isInRecoveryMode: Boolean
