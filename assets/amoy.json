@@ -1,0 +1,30 @@
+{
+    "stableAssets": [
+      {
+        "address": "0x07b655e4005804afB03986ceF4E611D63Eaac010",
+        "symbol": "USDC"
+      }
+    ],
+    "pricingAssets": [],
+    "fxAssetAggregators": [
+      {
+        "asset": "0x07b655e4005804afB03986ceF4E611D63Eaac010",
+        "assetSymbol": "USDC",
+        "aggregator": "0x1aF00782F74DdC4c7fCEFe8752113084FEBCDA45",
+        "aggregatorSymbol": "USDC/USD"
+      },
+      {
+        "asset": "0x4be0A15F36057b13022050753d09B6663837f963",
+        "assetSymbol": "PHX",
+        "aggregator": "0x3251e99cEf4b9bA03a6434B767aa5Ad11ca6cc31",
+        "aggregatorSymbol": "PHX/USD"
+      },
+      {
+        "asset": "0x9072828ff0c62311D522B0F0aa1C5ad72F5F8Ce0",
+        "assetSymbol": "PHPC",
+        "aggregator": "0x3251e99cEf4b9bA03a6434B767aa5Ad11ca6cc31",
+        "aggregatorSymbol": "PHPC/USD"
+      }
+    ]
+  }
+  

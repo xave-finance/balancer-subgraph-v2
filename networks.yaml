@@ -1,3 +1,36 @@
+amoy:
+  network: polygon-amoy
+  EventEmitter:
+    address: "0x41752aB22C4885F9CBBCB8081f9775C3988DdaFB"
+    startBlock: 7541915
+  Vault:
+    address: "0x58A2a5b6c5Aa29f3D50A2ac957d6C6B9B2b559b8"
+    startBlock: 6159435
+  ProtocolFeesCollector:
+    address: "0xB4b7ADB8Dd97523F59929b5ec6d2c34bF8E67B0c"
+    startBlock: 6159435
+  BalancerQueries:
+    address: "0x1898C1Be93bFbba10c4296CF05323c96Df585a02"
+    startBlock: 6159435
+  ProtocolFeePercentagesProvider:
+    address: "0xa86cd324716254183c13b5C44bB4358358eB70dc"
+    startBlock: 6159435
+  WeightedPoolV4Factory:
+    address: "0x66CeAF8ffCb2e988Af2AAA42B87DFFF022009f0F"
+    startBlock: 6159435
+  BalancerPoolDataQueries:
+    address: "0x306555b87501f8E418E0a98eCea9764E3729ee28"
+    startBlock: 6159435
+  ComposableStablePoolV6Factory:
+    address: "0xC11b809161c329AaC79729f89F3bef4923aCB342"
+    startBlock: 6159435
+  AaveLinearPoolV5Factory:
+    address: "0xa80aaFDebe6734dC1AD425F60917b5b5cA444e0E"
+    startBlock: 6159435
+  FXPoolDeployerTracker:
+    address: "0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba"
+    startBlock: 7540849
+
 artio:
   network: berachain-public-testnet
   EventEmitter:

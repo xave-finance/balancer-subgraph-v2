@@ -35,6 +35,7 @@ export let PRICING_ASSETS = assets.stableAssets.concat(assets.pricingAssets);
 class AddressByNetwork {
   public taikokatla: string;
   public berachainpublictestnet: string;
+  public polygonamoy: string;
 }
 
 let network: string = dataSource.network();
@@ -46,6 +47,7 @@ let network: string = dataSource.network();
 let vaultAddressByNetwork: AddressByNetwork = {
   taikokatla: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
   berachainpublictestnet: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
+  polygonamoy: '0x58A2a5b6c5Aa29f3D50A2ac957d6C6B9B2b559b8',
 };
 
 function forNetwork(addressByNetwork: AddressByNetwork, network: string): Address {
@@ -55,6 +57,8 @@ function forNetwork(addressByNetwork: AddressByNetwork, network: string): Addres
     return Address.fromString(addressByNetwork.taikokatla);
   } else if (network == 'berachainpublictestnet') {
     return Address.fromString(addressByNetwork.berachainpublictestnet);
+  } else if (network == 'polygonamoy') {
+    return Address.fromString(addressByNetwork.polygonamoy);
   } else {
     throw new Error('Unsupported network: ' + network);
   }
