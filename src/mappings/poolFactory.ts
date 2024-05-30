@@ -19,17 +19,19 @@ import {
   getProtocolFeeCollector,
   getToken,
   getFXOracle,
+  getTokenPriceId,
 } from './helpers/misc';
 import { updatePoolWeights } from './helpers/weighted';
 
-import { BigInt, Address, Bytes, ethereum, log } from '@graphprotocol/graph-ts';
+import { BigInt, Address, Bytes, ethereum, log, BigDecimal } from '@graphprotocol/graph-ts';
 
 import { PoolCreated } from '../types/WeightedPoolV4Factory/WeightedPoolFactory';
 import { AaveLinearPoolCreated } from '../types/AaveLinearPoolV5Factory/AaveLinearPoolV5Factory';
 // import { ProtocolIdRegistered } from '../types/ProtocolIdRegistry/ProtocolIdRegistry';
-import { Balancer, Pool, PoolContract, ProtocolIdData, FXPoolDeployer } from '../types/schema';
+import { Balancer, Pool, PoolContract, ProtocolIdData, FXPoolDeployer, TokenPrice } from '../types/schema';
 // import { KassandraPoolCreated } from '../types/ManagedKassandraPoolControllerFactory/ManagedKassandraPoolControllerFactory';
 import { NewFXPoolDeployer } from '../types/FXPoolDeployerTracker/FXPoolDeployerTracker';
+import { AnswerUpdated } from '../types/templates/OffchainAggregator/AccessControlledOffchainAggregator';
 
 // datasource
 import { OffchainAggregator, WeightedPool as WeightedPoolTemplate } from '../types/templates';
@@ -66,6 +68,7 @@ import { AggregatorConverter } from '../types/templates/FXPoolDeployer/Aggregato
 import { Transfer } from '../types/Vault/ERC20';
 import { handleTransfer, setPriceRateProvider } from './poolController';
 import { ComposableStablePool } from '../types/ComposableStablePoolV6Factory/ComposableStablePool';
+import { getLatestPriceId, handleAnswerUpdated, updateLatestPrice } from './pricing';
 
 function createWeightedLikePool(event: PoolCreated, poolType: string, poolTypeVersion: i32 = 1): string | null {
   let poolAddress: Address = event.params.pool;
@@ -716,6 +719,9 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
     // For FXPoolDeployer (permissionless), fetch the aggregator address dynamically
     let poolContract = FXPool.bind(poolAddress);
 
+    let aggregators: Address[] = [];
+    let aggregatorPrices: BigInt[] = [];
+
     for (let i = 0; i < tokensAddresses.length; i++) {
       let tokenAddress = tokensAddresses[i];
       let assimCall = poolContract.try_assimilator(tokenAddress);
@@ -729,8 +735,16 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
       let aggregatorCall = oracleContract.try_aggregator();
       if (aggregatorCall.reverted) continue;
 
+      let latestRoundData = ChainlinkPriceFeed.bind(oracleCall.value).try_latestRoundData();
+      if (latestRoundData.reverted) {
+        log.error('Failed to get latestRoundData for oracle: {}', [oracleCall.value.toHexString()]);
+      } else {
+        aggregatorPrices.push(latestRoundData.value.getAnswer());
+      }
+
       // Create OffchainAggregator template
       let aggregatorAddress = aggregatorCall.value;
+      aggregators.push(aggregatorAddress);
       OffchainAggregator.create(aggregatorAddress);
 
       // Update FXOracle supported tokens
@@ -766,6 +780,13 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
 
       oracle.tokens = tokenAddresses;
       oracle.save();
+    }
+
+    if (aggregators.length !== 2 || aggregatorPrices.length !== 2) {
+      log.error('Failed to get both aggregators and prices for FXPool: {}', [poolAddress.toHexString()]);
+    } else {
+      setFXPoolTokenPriceData(event, aggregators[0], aggregatorPrices[0], tokensAddresses[0], tokensAddresses[1]);
+      setFXPoolTokenPriceData(event, aggregators[1], aggregatorPrices[1], tokensAddresses[1], tokensAddresses[0]);
     }
   }
 }
@@ -866,6 +887,46 @@ function getFXPoolProtocolFee(poolAddress: Address): i32 {
     return i32(parseInt('0'));
   }
   return i32(parseInt(call.value.toString()));
+}
+
+function setFXPoolTokenPriceData(
+  event: ethereum.Event,
+  t0aggregatorAddress: Address,
+  price: BigInt,
+  t0: Address,
+  t1: Address
+): void {
+  let poolId = event.parameters[1].value.toBytes();
+
+  let tokenPriceId = getTokenPriceId(poolId.toHex(), t0, t1, event.block.number);
+  let tokenPrice = new TokenPrice(tokenPriceId);
+  tokenPrice.poolId = poolId.toHex();
+  tokenPrice.block = event.block.number;
+  tokenPrice.timestamp = event.block.timestamp.toI32();
+  tokenPrice.asset = t0;
+  tokenPrice.amount = BigDecimal.fromString('1');
+  tokenPrice.pricingAsset = t1;
+  tokenPrice.price = BigDecimal.fromString(price.toString());
+  tokenPrice.save();
+  // update token.latestUSDPrice and create a LatestPrice entity
+  updateLatestPrice(tokenPrice, event.block.timestamp);
+
+  // build a mock event to pass to handleAnswerUpdated
+  let mockEvent = new AnswerUpdated(
+    t0aggregatorAddress,
+    event.logIndex,
+    event.transactionLogIndex,
+    event.logType,
+    event.block,
+    event.transaction,
+    [
+      new ethereum.EventParam('current', ethereum.Value.fromSignedBigInt(price)),
+      new ethereum.EventParam('roundId', ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))),
+      new ethereum.EventParam('updatedAt', ethereum.Value.fromUnsignedBigInt(event.block.timestamp)),
+    ],
+    event.receipt
+  );
+  handleAnswerUpdated(mockEvent);
 }
 
 // export function handleProtocolIdRegistryOrRename(event: ProtocolIdRegistered): void {
