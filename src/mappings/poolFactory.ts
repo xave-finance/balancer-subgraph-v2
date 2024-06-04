@@ -908,8 +908,12 @@ function setFXPoolTokenPriceData(
   tokenPrice.pricingAsset = t1;
   tokenPrice.price = BigDecimal.fromString(price.toString());
   tokenPrice.save();
-  // update token.latestUSDPrice and create a LatestPrice entity
-  updateLatestPrice(tokenPrice, event.block.timestamp);
+
+  let token0 = getToken(t0);
+  token0.latestUSDPriceTimestamp = event.block.timestamp;
+  token0.latestUSDPrice = price.toBigDecimal();
+  token0.latestPrice = tokenPrice.id;
+  token0.save();
 
   // build a mock event to pass to handleAnswerUpdated
   let mockEvent = new AnswerUpdated(

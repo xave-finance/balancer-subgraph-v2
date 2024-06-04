@@ -31,6 +31,39 @@ artio:
     address: "0x90c58D12b248d7054adcB5baad467dEb8e33ABcE"
     startBlock: 1797030
 
+hekla:
+  network: taiko-hekla-testnet
+  EventEmitter:
+    address: "0x3F4954A365b0D74A9Cc292735680224091599AE2"
+    startBlock: 282766
+  Vault:
+    address: "0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5"
+    startBlock: 282766
+  ProtocolFeesCollector:
+    address: "0x1c5985b52864744d4b2BA90061851D04D234E409"
+    startBlock: 282766
+  BalancerQueries:
+    address: "0x1176d13F6fc2afc3F4DcDB44CD3E014398be6ac7"
+    startBlock: 282766
+  ProtocolFeePercentagesProvider:
+    address: "0x298c1167E96528111544C8AD5401a2Ef57f5b7fF"
+    startBlock: 282766
+  WeightedPoolV4Factory:
+    address: "0xAe0429F26ed25c8Ad22D2582315Cc99aa5de8fF6"
+    startBlock: 282766
+  BalancerPoolDataQueries:
+    address: "0x6EbB802Ad48aA39C50a4Bf175aDD81E966cE1D4D"
+    startBlock: 282766
+  ComposableStablePoolV6Factory:
+    address: "0x38cD4fc5F162D07Cd20bEeCc97F532632280624C"
+    startBlock: 282766
+  AaveLinearPoolV5Factory:
+    address: "0x4f6d8C54463E88efDC52daf0D000386ea0483182"
+    startBlock: 282766
+  FXPoolDeployerTracker:
+    address: "0x4fbc1dFfd80F197CF99FAeDa8f7Bcae0Ebea4d81"
+    startBlock: 282766
+
 katla:
   network: taiko-katla
   EventEmitter:
