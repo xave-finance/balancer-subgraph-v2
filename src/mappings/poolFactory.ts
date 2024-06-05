@@ -909,12 +909,6 @@ function setFXPoolTokenPriceData(
   tokenPrice.price = BigDecimal.fromString(price.toString());
   tokenPrice.save();
 
-  let token0 = getToken(t0);
-  token0.latestUSDPriceTimestamp = event.block.timestamp;
-  token0.latestUSDPrice = price.toBigDecimal();
-  token0.latestPrice = tokenPrice.id;
-  token0.save();
-
   // build a mock event to pass to handleAnswerUpdated
   let mockEvent = new AnswerUpdated(
     t0aggregatorAddress,
@@ -931,6 +925,13 @@ function setFXPoolTokenPriceData(
     event.receipt
   );
   handleAnswerUpdated(mockEvent);
+
+  // handleAnswerUpdated will have updated token.latestFXPrice: use that to initialize the latestUSDPrice
+  let token0 = getToken(t0);
+  token0.latestUSDPriceTimestamp = event.block.timestamp;
+  token0.latestUSDPrice = token0.latestFXPrice;
+  token0.latestPrice = tokenPrice.id;
+  token0.save();
 }
 
 // export function handleProtocolIdRegistryOrRename(event: ProtocolIdRegistered): void {

@@ -35,7 +35,7 @@ export let PRICING_ASSETS = assets.stableAssets.concat(assets.pricingAssets);
 class AddressByNetwork {
   public taikokatla: string;
   public berachainpublictestnet: string;
-  public taikohekla: string;
+  public taikoheklatestnet: string;
 }
 
 let network: string = dataSource.network();
@@ -47,7 +47,7 @@ let network: string = dataSource.network();
 let vaultAddressByNetwork: AddressByNetwork = {
   taikokatla: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
   berachainpublictestnet: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
-  taikohekla: '0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5',
+  taikoheklatestnet: '0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5',
 };
 
 function forNetwork(addressByNetwork: AddressByNetwork, network: string): Address {
@@ -55,8 +55,8 @@ function forNetwork(addressByNetwork: AddressByNetwork, network: string): Addres
   network = network.replace('-', '').replace('-', '');
   if (network == 'taikokatla') {
     return Address.fromString(addressByNetwork.taikokatla);
-  } else if (network == 'taikohekla') {
-    return Address.fromString(addressByNetwork.taikohekla);
+  } else if (network == 'taikoheklatestnet') {
+    return Address.fromString(addressByNetwork.taikoheklatestnet);
   } else if (network == 'berachainpublictestnet') {
     return Address.fromString(addressByNetwork.berachainpublictestnet);
   } else {
