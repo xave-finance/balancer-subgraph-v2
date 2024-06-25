@@ -46,7 +46,7 @@ let network: string = dataSource.network();
 // with a new entry for the new network - folowwing subgraph slugs
 let vaultAddressByNetwork: AddressByNetwork = {
   taikokatla: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
-  berachainpublictestnet: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
+  berachainpublictestnet: '0x6a7531477Da1ff5571EB71649d6EeE2db305375E',
   taikoheklatestnet: '0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5',
 };
 
