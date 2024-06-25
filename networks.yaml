@@ -1,5 +1,5 @@
 bartio:
-  network: berachain-public-testnet
+  network: berachain-bartio
   EventEmitter:
     address: "0x691D4d0e34e48a08991FdF43374b31955A496317"
     startBlock: 95351
@@ -30,6 +30,39 @@ bartio:
   FXPoolDeployerTracker:
     address: "0x4475Ba7AfdCfC0ED90772843A106b2C77395f19C"
     startBlock: 95351
+
+artio:
+  network: berachain-public-testnet
+  EventEmitter:
+    address: "0x63b946998C5Db9131314A3b582011fCf4bd74fcd"
+    startBlock: 1676203
+  Vault:
+    address: "0xD6D473f54Cda4eb4396690e35d806131bdffE579"
+    startBlock: 1676203
+  ProtocolFeesCollector:
+    address: "0x470b5AC180563707bc77c61B2E1b8F234A4b06C1"
+    startBlock: 1676203
+  BalancerQueries:
+    address: "0x2d31a84fF2447369a2e6cC17BBf155e8Be8056CF"
+    startBlock: 1676203
+  ProtocolFeePercentagesProvider:
+    address: "0xAEBfa76e468B2EbfAA71487B394BD065f9766D95"
+    startBlock: 1676203
+  WeightedPoolV4Factory:
+    address: "0x3D0f0422aa3afD4F00F71c7A606b5d7Bf231E571"
+    startBlock: 1676203
+  BalancerPoolDataQueries:
+    address: "0x0A395bC66d0A86b37C111652aE6228cd65F178C4"
+    startBlock: 1676203
+  ComposableStablePoolV6Factory:
+    address: "0x63064565EA69E0CaBFBF225F14058f76B4cECfb8"
+    startBlock: 1676203
+  AaveLinearPoolV5Factory:
+    address: "0x51440C7d318Dd61A5e76053084cC591Be8D6574b"
+    startBlock: 1676203
+  FXPoolDeployerTracker:
+    address: "0x90c58D12b248d7054adcB5baad467dEb8e33ABcE"
+    startBlock: 1797030
 
 hekla:
   network: taiko-hekla-testnet

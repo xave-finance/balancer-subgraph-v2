@@ -1,4 +1,4 @@
-import { BigDecimal, BigInt, Address, dataSource } from '@graphprotocol/graph-ts';
+import { Address, BigDecimal, BigInt, dataSource } from '@graphprotocol/graph-ts';
 
 import { assets } from './assets';
 
@@ -35,6 +35,7 @@ export let PRICING_ASSETS = assets.stableAssets.concat(assets.pricingAssets);
 class AddressByNetwork {
   public taikokatla: string;
   public berachainpublictestnet: string;
+  public berachainbartio: string;
   public taikoheklatestnet: string;
 }
 
@@ -46,7 +47,8 @@ let network: string = dataSource.network();
 // with a new entry for the new network - folowwing subgraph slugs
 let vaultAddressByNetwork: AddressByNetwork = {
   taikokatla: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
-  berachainpublictestnet: '0x6a7531477Da1ff5571EB71649d6EeE2db305375E',
+  berachainpublictestnet: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
+  berachainbartio: '0x6a7531477Da1ff5571EB71649d6EeE2db305375E',
   taikoheklatestnet: '0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5',
 };
 
@@ -59,6 +61,8 @@ function forNetwork(addressByNetwork: AddressByNetwork, network: string): Addres
     return Address.fromString(addressByNetwork.taikoheklatestnet);
   } else if (network == 'berachainpublictestnet') {
     return Address.fromString(addressByNetwork.berachainpublictestnet);
+  } else if (network == 'berachainbartio') {
+    return Address.fromString(addressByNetwork.berachainbartio);
   } else {
     throw new Error('Unsupported network: ' + network);
   }
