@@ -63,6 +63,9 @@ dataSources:
         - TradePair
         - TradePairSnapshot
         - BalancerSnapshot
+        - BurrUser
+        - BurrSwap
+        - BurrJoinPool
       abis:
         - name: Vault
           file: ./abis/Vault.json

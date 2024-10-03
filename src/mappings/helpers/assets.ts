@@ -10,19 +10,21 @@ class Assets {
   public fxAssetAggregators: Address[][];
 }
 
-export const USDC_ADDRESS = Address.fromString('0xf3585984B956f2A26694ee1BAede7eAB658A5e7E');
+export const USDC_ADDRESS = Address.fromString('0xd6D83aF58a19Cd14eF3CF6fe848C9A4d21e5727c');
+export const HONEY_ADDRESS = Address.fromString('0x0E4aaF1351de4c0264C5c7056Ef3777b41BD8e03');
 export const Mock_DAI_ADDRESS = Address.fromString('0x7Ab404C804Df8f9f8A44A63e3B546bC16E98b5bf');
 
 export const assets: Assets = {
   stableAssets: [
-    Address.fromString('0xf3585984B956f2A26694ee1BAede7eAB658A5e7E'), // USDC
+    Address.fromString('0xd6D83aF58a19Cd14eF3CF6fe848C9A4d21e5727c'), // USDC
+    Address.fromString('0x0E4aaF1351de4c0264C5c7056Ef3777b41BD8e03'), // HONEY
     Address.fromString('0x7Ab404C804Df8f9f8A44A63e3B546bC16E98b5bf'), // Mock_DAI
   ],
   pricingAssets: [
   ],
   fxAssetAggregators: [
     [
-      Address.fromString('0xf3585984B956f2A26694ee1BAede7eAB658A5e7E'), // USDC
+      Address.fromString('0xd6D83aF58a19Cd14eF3CF6fe848C9A4d21e5727c'), // USDC
       Address.fromString('0xc85F993de85896B521701B42299df1103A4d4D67'), // USDC/USD
     ],
     [

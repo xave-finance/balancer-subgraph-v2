@@ -274,6 +274,10 @@ export function createUserEntity(address: Address): void {
   let addressHex = address.toHex();
   if (User.load(addressHex) == null) {
     let user = new User(addressHex);
+    user.swapVolume = ZERO_BD;
+    user.totalLiquidityDepositVolume = ZERO_BD;
+    user.nectHoneyLiquidityDepositVolume = ZERO_BD;
+    user.nectHoneyUsdcLiquidityDepositVolume = ZERO_BD;
     user.save();
   }
 }

@@ -200,12 +200,27 @@ type PoolShare @entity {
   balance: BigDecimal!
 }
 
+type JoinPool @entity {
+  id: ID!
+  user: User!
+  pool: Pool!
+  vault: String!
+  tokens: [String!]!
+  amounts: [BigDecimal!]!
+  timestamp: BigInt!
+}
+
 type User @entity {
   id: ID!
   sharesOwned: [PoolShare!] @derivedFrom(field: "userAddress")
   swaps: [Swap!] @derivedFrom(field: "userAddress")
   userInternalBalances: [UserInternalBalance!]
     @derivedFrom(field: "userAddress")
+  swapVolume: BigDecimal # Total volume of swaps made by this user
+  totalLiquidityDepositVolume: BigDecimal # Total volume of liquidity deposits made by this user
+  nectHoneyLiquidityDepositVolume: BigDecimal
+  nectHoneyUsdcLiquidityDepositVolume: BigDecimal
+  joinPools: [JoinPool!]! @derivedFrom(field: "user")
 }
 
 type UserInternalBalance @entity {

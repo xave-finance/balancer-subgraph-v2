@@ -1,5 +1,12 @@
 bartio:
   network: berachain-bartio
+  features:
+    - grafting # feature name
+  graft:
+    # @TODO remove graft for production
+    block: 5042341
+    base: QmRQDzMchNhmGPry1WCYku9Jy72KUcjnQAxNaotDQxTiQ2
+
   EventEmitter:
     address: "0x691D4d0e34e48a08991FdF43374b31955A496317"
     startBlock: 95351

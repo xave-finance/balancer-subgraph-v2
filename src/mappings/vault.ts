@@ -15,6 +15,7 @@ import {
   ManagementOperation,
   Token,
   PoolContract,
+  User,
 } from '../types/schema';
 import {
   tokenToDecimal,
@@ -193,6 +194,31 @@ function handlePoolJoined(event: PoolBalanceChanged): void {
   join.valueUSD = valueUSD;
   join.block = event.block.number;
   join.save();
+
+  // update user's join amount
+  createUserEntity(event.params.liquidityProvider);
+
+  let user = User.load(join.user);
+  if (user == null) {
+    log.warning('User not found for address: {}', [join.user]);
+    return;
+  }
+  log.error('[BURR] updating user liquidity deposit volume {} {}', [join.user, valueUSD.toString()]);
+  let totalLiquidityDepositVolume = user.totalLiquidityDepositVolume ? user.totalLiquidityDepositVolume : ZERO_BD;
+  if (join.pool == '0x6d6689c293f481ebe910aaad043914758cd63803000200000000000000000038') {
+    let nectHoneyLiquidityDepositVolume = user.nectHoneyLiquidityDepositVolume
+      ? user.nectHoneyLiquidityDepositVolume
+      : ZERO_BD;
+    user.nectHoneyLiquidityDepositVolume = nectHoneyLiquidityDepositVolume!.plus(valueUSD);
+  }
+  if (join.pool == '0x0a2ec718a5ea6cee20d96718df524d25023b5083000000000000000000000066') {
+    let nectHoneyUsdcLiquidityDepositVolume = user.nectHoneyUsdcLiquidityDepositVolume
+      ? user.nectHoneyUsdcLiquidityDepositVolume
+      : ZERO_BD;
+    user.nectHoneyUsdcLiquidityDepositVolume = nectHoneyUsdcLiquidityDepositVolume!.plus(valueUSD);
+  }
+  user.totalLiquidityDepositVolume = totalLiquidityDepositVolume!.plus(valueUSD);
+  user.save();
 
   let protocolFeeUSD = ZERO_BD;
   for (let i: i32 = 0; i < tokenAddresses.length; i++) {
@@ -623,6 +649,16 @@ export function handleSwapEvent(event: SwapEvent): void {
   swap.tx = transactionHash;
   swap.block = event.block.number;
   swap.save();
+
+  let user = User.load(event.transaction.from.toHex());
+  if (user == null) {
+    log.warning('User not found for address: {}', [event.transaction.from.toHex()]);
+    return;
+  }
+  log.error('[BURR] updating user swap volume: {} {}', [user.id, swapValueUSD.toString()]);
+  let _swapVolume = user.swapVolume ? user.swapVolume : ZERO_BD;
+  user.swapVolume = _swapVolume!.plus(swapValueUSD);
+  user.save();
 
   // update pool swapsCount
   // let pool = Pool.load(poolId.toHex());
