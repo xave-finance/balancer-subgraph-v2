@@ -1,35 +1,35 @@
 bartio:
   network: berachain-bartio
   EventEmitter:
-    address: "0x691D4d0e34e48a08991FdF43374b31955A496317"
-    startBlock: 95351
+    address: "0xC75D804944d3E7e65Df6542fA6445390DB59C15a"
+    startBlock: 5905200
   Vault:
-    address: "0x6a7531477Da1ff5571EB71649d6EeE2db305375E"
-    startBlock: 95351
+    address: "0xFDb2925aE2d3E2eacFE927611305e5e56AA5f832"
+    startBlock: 5905200
   ProtocolFeesCollector:
-    address: "0x0e1f9B24Cb920d262b34721706f7197BFD87577C"
-    startBlock: 95351
+    address: "0x86EaB6dc751BF99686550ce02d66BDFF3bf4b492"
+    startBlock: 5905200
   BalancerQueries:
-    address: "0xBAd37cd60B5F65a72136Ff1c75198d79d65CDE32"
-    startBlock: 95351
+    address: "0x878aB84Abc562e311fCe6DfB1d2b74B746D95ae4"
+    startBlock: 5905200
   ProtocolFeePercentagesProvider:
-    address: "0x579270F151D142eb8BdC081043a983307Aa15786"
-    startBlock: 95351
+    address: "0x3c9BcB291B5BC0aED5491Ef461933d217039246E"
+    startBlock: 5905200
   WeightedPoolV4Factory:
-    address: "0xb4a183d38F754D83AA97810D80FC5BaCCd5c8441"
-    startBlock: 95351
+    address: "0xFc1637d65A83F0f991C75ABF3b7B8a3aDbF6504D"
+    startBlock: 5905200
   BalancerPoolDataQueries:
-    address: "0xB32EcEb4f6B5e840Fe0e4ff127D7761D13a4C092"
-    startBlock: 95351
+    address: "0x8aA3dfBB7718B61710884F38fC374Cb778ce34Bd"
+    startBlock: 5905200
   ComposableStablePoolV6Factory:
-    address: "0x0dCc3A237A4dD7bF01E9D3AF1185736eadC591E0"
-    startBlock: 95351
+    address: "0x18a11aa3fd4d16358016E224fBE226D2297BdDac"
+    startBlock: 5905200
   AaveLinearPoolV5Factory:
-    address: "0xAe0429F26ed25c8Ad22D2582315Cc99aa5de8fF6"
-    startBlock: 95351
+    address: "0x85070081473D2A17eBe199F381b879e3fBA27D11"
+    startBlock: 5905200
   FXPoolDeployerTracker:
-    address: "0x4475Ba7AfdCfC0ED90772843A106b2C77395f19C"
-    startBlock: 95351
+    address: "0xF609eEfEA897ed03d40535a59FA17E075c02Ea94"
+    startBlock: 5905200
 
 taiko:
   network: taiko
