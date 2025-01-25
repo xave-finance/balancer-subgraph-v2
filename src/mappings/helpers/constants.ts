@@ -36,6 +36,7 @@ class AddressByNetwork {
   public taikokatla: string;
   public berachainpublictestnet: string;
   public berachainbartio: string;
+  public berachain: string;
   public taikoheklatestnet: string;
   public taiko: string;
 }
@@ -50,6 +51,7 @@ let vaultAddressByNetwork: AddressByNetwork = {
   taikokatla: '0x7A73FA0Be231B44dbcA23E98F49CAe7F11f367Ba',
   berachainpublictestnet: '0xD6D473f54Cda4eb4396690e35d806131bdffE579',
   berachainbartio: '0xFDb2925aE2d3E2eacFE927611305e5e56AA5f832',
+  berachain: '0xBE09E71BDc7b8a50A05F7291920590505e3C7744',
   taikoheklatestnet: '0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5',
   taiko: '0x3251e99cEf4b9bA03a6434B767aa5Ad11ca6cc31',
 };
@@ -63,6 +65,8 @@ function forNetwork(addressByNetwork: AddressByNetwork, network: string): Addres
     return Address.fromString(addressByNetwork.taikoheklatestnet);
   } else if (network == 'taiko') {
     return Address.fromString(addressByNetwork.taiko);
+  } else if (network == 'berachain') {
+    return Address.fromString(addressByNetwork.berachain);
   } else if (network == 'berachainpublictestnet') {
     return Address.fromString(addressByNetwork.berachainpublictestnet);
   } else if (network == 'berachainbartio') {
