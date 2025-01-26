@@ -2,34 +2,34 @@ berachain:
   network: berachain-mainnet
   EventEmitter:
     address: "0x79ca9E87e77906DFa9712D151c68F3b709490cAb"
-    startBlock: 117101
+    startBlock: 117100
   Vault:
     address: "0xBE09E71BDc7b8a50A05F7291920590505e3C7744"
-    startBlock: 117101
+    startBlock: 117100
   ProtocolFeesCollector:
     address: "0x19C15d9C3FA6D431eC85F7147E5174ecACb6C206"
-    startBlock: 117101
+    startBlock: 117100
   BalancerQueries:
     address: "0x48205280899D45838dD01124C017C972A0E11Cd3"
-    startBlock: 117101
+    startBlock: 117100
   ProtocolFeePercentagesProvider:
     address: "0xeFA1A53ea939013017e654beEdfC6f80E64ffC2d"
-    startBlock: 117101
+    startBlock: 117100
   WeightedPoolV4Factory:
     address: "0x5A17a84AeD9cC71FaE5359162D55e9Df5467bA5e"
-    startBlock: 117101
+    startBlock: 117100
   BalancerPoolDataQueries:
     address: "0x5Aef74eF50e5f1fF00e030d0BD9E91a91635Dd9A"
-    startBlock: 117101
+    startBlock: 117100
   ComposableStablePoolV6Factory:
     address: "0x978bacA1a90e6e6a9d61708414b1b2f5bC26d6f7"
-    startBlock: 117101
+    startBlock: 117100
   AaveLinearPoolV5Factory:
     address: "0x695302D7f68A62F1421F75E622EF1D1969373eB3"
-    startBlock: 117101
+    startBlock: 117100
   FXPoolDeployerTracker:
     address: "0x5354a7B0fBD69Ee23DE0a71A65b5D9Bbb69f66A4"
-    startBlock: 117101
+    startBlock: 117100
 
 bartio:
   network: berachain-bartio

@@ -65,7 +65,7 @@ function forNetwork(addressByNetwork: AddressByNetwork, network: string): Addres
     return Address.fromString(addressByNetwork.taikoheklatestnet);
   } else if (network == 'taiko') {
     return Address.fromString(addressByNetwork.taiko);
-  } else if (network == 'berachain') {
+  } else if (network == 'berachainmainnet') {
     return Address.fromString(addressByNetwork.berachain);
   } else if (network == 'berachainpublictestnet') {
     return Address.fromString(addressByNetwork.berachainpublictestnet);
