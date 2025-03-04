@@ -20,7 +20,7 @@ import { Swap as SwapEvent, Vault } from '../../types/Vault/Vault';
 import { ONE_BD, SWAP_IN, SWAP_OUT, VAULT_ADDRESS, ZERO, ZERO_ADDRESS, ZERO_BD } from './constants';
 import { PoolType, getPoolAddress, isComposableStablePool } from './pools';
 import { ComposableStablePool } from '../../types/ComposableStablePoolV6Factory/ComposableStablePool';
-import { valueInUSD } from '../pricing';
+import { isUSDStable, valueInUSD } from '../pricing';
 
 const DAY = 24 * 60 * 60;
 
@@ -310,6 +310,23 @@ export function createToken(tokenAddress: Address): Token {
   token.totalVolumeUSD = ZERO_BD;
   token.totalVolumeNotional = ZERO_BD;
   token.address = tokenAddress.toHexString();
+
+  // Initialize price data with defaults to ensure new tokens have some price information
+  // This prevents the need to manually emit pricing events for new tokens
+  token.latestUSDPriceTimestamp = BigInt.fromI32(0);
+
+  // Check if token is a stablecoin (optional, based on known stablecoin addresses)
+  if (isUSDStable(tokenAddress)) {
+    // If it's a stablecoin, initialize with price of 1
+    token.latestFXPrice = ONE_BD;
+    token.latestUSDPrice = ONE_BD;
+  } else {
+    // For non-stablecoins, initialize with zero price
+    // The actual price will be set when a pricing event occurs
+    token.latestFXPrice = ZERO_BD;
+    token.latestUSDPrice = ZERO_BD;
+  }
+
   token.save();
   return token;
 }

@@ -8,7 +8,14 @@ import {
   ZERO_ADDRESS,
   MIN_POOL_LIQUIDITY,
 } from './helpers/constants';
-import { hasVirtualSupply, isComposableStablePool, isLinearPool, isFXPool, PoolType } from './helpers/pools';
+import {
+  hasVirtualSupply,
+  isComposableStablePool,
+  isLinearPool,
+  isFXPool,
+  isStableLikePool,
+  PoolType,
+} from './helpers/pools';
 import {
   bytesToAddress,
   createPoolSnapshot,
@@ -170,9 +177,9 @@ export function updatePoolLiquidity(poolId: string, block_number: BigInt, timest
 
   // We want to avoid too frequently calling setWrappedTokenPrice because it makes a call to the rate provider
   // Doing it here allows us to do it only once, when the MIN_POOL_LIQUIDITY threshold is crossed
-  if (oldPoolLiquidity < MIN_POOL_LIQUIDITY) {
-    // setWrappedTokenPrice(pool, poolId, block_number, timestamp);
-  }
+  // if (oldPoolLiquidity < MIN_POOL_LIQUIDITY) {
+  //   setWrappedTokenPrice(pool, poolId, block_number, timestamp);
+  // }
 
   // update BPT price
   if (newPoolLiquidity.gt(MIN_POOL_LIQUIDITY)) {
@@ -428,5 +435,93 @@ export function handleAnswerUpdated(event: AnswerUpdated): void {
     }
 
     token.save();
+  }
+}
+
+function _findPricingAsset(pool: Pool): Address | null {
+  let tokensList: Bytes[] = pool.tokensList;
+  if (tokensList.length < 2) return null;
+  for (let i = 0; i < tokensList.length; i++) {
+    let tokenAddress = Address.fromString(tokensList[i].toHexString());
+    if (isPricingAsset(tokenAddress) || isUSDStable(tokenAddress)) {
+      return tokenAddress;
+    }
+  }
+  return null;
+}
+
+// Initialize prices for tokens in a newly created pool
+export function initializeTokenPrices(pool: Pool): void {
+  let tokensList: Bytes[] = pool.tokensList;
+  if (tokensList.length < 2) return;
+  // For non-FX pools we'll derive prices based on pool balances
+  if (isFXPool(pool)) {
+    return;
+  }
+  // Find a pricing asset in the pool if possible
+  let pricingAsset: Address | null = _findPricingAsset(pool);
+  // If we found a pricing asset, use it to derive prices for other tokens
+  if (!pricingAsset) {
+    return;
+  }
+  // Get the pricing asset's pool token to access its balance
+  let pricingAssetPoolToken = loadPoolToken(pool.id, pricingAsset);
+  if (!pricingAssetPoolToken || pricingAssetPoolToken.balance.equals(ZERO_BD)) {
+    log.warning('Pricing asset pool token not found or has zero balance for pool with id {}', [pool.id]);
+    return;
+  }
+  // Now derive prices for all other tokens using pool ratios
+  for (let i = 0; i < tokensList.length; i++) {
+    let tokenAddress = Address.fromString(tokensList[i].toHexString());
+    // Skip the pricing asset itself and tokens that already have a price
+    if (tokenAddress.equals(pricingAsset)) continue;
+    let token = getToken(tokenAddress);
+    // Only initialize if the token doesn't have a price yet
+    let latestPrice = token.latestUSDPrice;
+    if (latestPrice && !latestPrice.equals(ZERO_BD)) continue;
+    let poolToken = loadPoolToken(pool.id, tokenAddress);
+    if (!poolToken || poolToken.balance.equals(ZERO_BD)) continue;
+    // In Balancer pools, tokens are proportional by value
+    // We can derive the price by comparing balances and existing price of the pricing asset
+    // For weighted pools, we need to account for weights
+    if (pool.poolType == PoolType.Weighted) {
+      // Get token weights from the PoolToken entities
+      let tokenPoolToken = loadPoolToken(pool.id, tokenAddress);
+      if (!tokenPoolToken) {
+        log.warning('Token with address {} not found', [tokenAddress.toHexString()]);
+        continue;
+      }
+      let tokenWeight = tokenPoolToken.weight;
+      let pricingAssetWeight = pricingAssetPoolToken.weight;
+      if (!tokenWeight || !pricingAssetWeight) {
+        log.warning('Token weight not found for token with address {}', [tokenAddress.toHexString()]);
+        continue;
+      }
+      const pricingTokenValue = valueInUSD(ONE_BD, pricingAsset);
+      const derivedPrice = pricingAssetPoolToken.balance
+        .div(poolToken.balance)
+        .times(tokenWeight.div(pricingAssetWeight))
+        .times(pricingTokenValue);
+      // Update token price
+      token.latestUSDPrice = derivedPrice;
+      let createTime = pool.createTime;
+      if (!createTime) {
+        log.warning('Pool create time not found for pool with id {}', [pool.id]);
+        continue;
+      }
+      token.latestUSDPriceTimestamp = BigInt.fromI32(createTime);
+      token.save();
+    } else if (isStableLikePool(pool)) {
+      // For stable pools, tokens should be roughly equal in value
+      // Get pricing asset token to derive other token prices
+      const pricingTokenValue = valueInUSD(ONE_BD, pricingAsset);
+      // For stable pools, tokens should have roughly equal value, but we still
+      // factor in potential differences in balances
+      const derivedPrice = pricingAssetPoolToken.balance.div(poolToken.balance).times(pricingTokenValue);
+      // Update token price
+      token.latestUSDPrice = derivedPrice;
+      token.latestUSDPriceTimestamp = BigInt.fromI32(pool.createTime);
+      token.save();
+    }
   }
 }

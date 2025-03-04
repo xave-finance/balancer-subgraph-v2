@@ -1,10 +1,19 @@
-import { ZERO_BD, ZERO, FX_ASSET_AGGREGATORS, VAULT_ADDRESS, ZERO_ADDRESS, ProtocolFeeType } from './helpers/constants';
+import {
+  ZERO_BD,
+  ZERO,
+  FX_ASSET_AGGREGATORS,
+  VAULT_ADDRESS,
+  ZERO_ADDRESS,
+  ProtocolFeeType,
+  ONE_BD,
+} from './helpers/constants';
 import {
   getPoolTokenManager,
   getPoolTokens,
   isManagedPool,
   isMetaStableDeprecated,
   PoolType,
+  isStableLikePool,
   // setPriceRateProviders,
 } from './helpers/pools';
 
@@ -68,7 +77,13 @@ import { AggregatorConverter } from '../types/templates/FXPoolDeployer/Aggregato
 import { Transfer } from '../types/Vault/ERC20';
 import { handleTransfer, setPriceRateProvider } from './poolController';
 import { ComposableStablePool } from '../types/ComposableStablePoolV6Factory/ComposableStablePool';
-import { getLatestPriceId, handleAnswerUpdated, updateLatestPrice } from './pricing';
+import {
+  getLatestPriceId,
+  handleAnswerUpdated,
+  updateLatestPrice,
+  initializeTokenPrices,
+  isUSDStable,
+} from './pricing';
 
 function createWeightedLikePool(event: PoolCreated, poolType: string, poolTypeVersion: i32 = 1): string | null {
   let poolAddress: Address = event.params.pool;
@@ -707,14 +722,49 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
 
   if (!permissionless) {
     // For FXPoolFactory, use hardcoded aggregator addresses
-    tokensAddresses.forEach((tokenAddress) => {
+    for (let t = 0; t < tokensAddresses.length; t++) {
+      let tokenAddress = tokensAddresses[t];
       for (let i = 0; i < FX_ASSET_AGGREGATORS.length; i++) {
         if (FX_ASSET_AGGREGATORS[i][0] == tokenAddress) {
-          OffchainAggregator.create(FX_ASSET_AGGREGATORS[i][1]);
+          let aggregatorAddress = FX_ASSET_AGGREGATORS[i][1];
+          OffchainAggregator.create(aggregatorAddress);
+
+          // Use mock event to get initial price for oracle-based tokens
+          let token = getToken(tokenAddress);
+          let latestFXPrice = token.latestFXPrice;
+          if (!latestFXPrice || latestFXPrice.equals(ZERO_BD)) {
+            // Get the latest price from the oracle
+            let aggregator = ChainlinkPriceFeed.bind(aggregatorAddress);
+            let latestRoundData = aggregator.try_latestRoundData();
+
+            if (latestRoundData.reverted) {
+              log.error('Failed to get latestRoundData for oracle: {}', [aggregatorAddress.toHexString()]);
+            } else {
+              // Create mock event to trigger price update
+              let mockEvent = new AnswerUpdated(
+                aggregatorAddress,
+                event.logIndex,
+                event.transactionLogIndex,
+                event.logType,
+                event.block,
+                event.transaction,
+                [
+                  new ethereum.EventParam(
+                    'current',
+                    ethereum.Value.fromSignedBigInt(latestRoundData.value.getAnswer())
+                  ),
+                  new ethereum.EventParam('roundId', ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))),
+                  new ethereum.EventParam('updatedAt', ethereum.Value.fromUnsignedBigInt(event.block.timestamp)),
+                ],
+                event.receipt
+              );
+              handleAnswerUpdated(mockEvent);
+            }
+          }
           break;
         }
       }
-    });
+    }
   } else {
     // For FXPoolDeployer (permissionless), fetch the aggregator address dynamically
     let poolContract = FXPool.bind(poolAddress);
@@ -780,6 +830,28 @@ function handleNewFXPool(event: ethereum.Event, permissionless: boolean): void {
 
       oracle.tokens = tokenAddresses;
       oracle.save();
+
+      // Also initialize token prices immediately using the oracle data
+      let token = getToken(tokenAddress);
+      let latestFXPrice = token.latestFXPrice;
+      if ((!latestFXPrice || latestFXPrice.equals(ZERO_BD)) && !latestRoundData.reverted) {
+        // Create mock event to trigger price update
+        let mockEvent = new AnswerUpdated(
+          aggregatorAddress,
+          event.logIndex,
+          event.transactionLogIndex,
+          event.logType,
+          event.block,
+          event.transaction,
+          [
+            new ethereum.EventParam('current', ethereum.Value.fromSignedBigInt(latestRoundData.value.getAnswer())),
+            new ethereum.EventParam('roundId', ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))),
+            new ethereum.EventParam('updatedAt', ethereum.Value.fromUnsignedBigInt(event.block.timestamp)),
+          ],
+          event.receipt
+        );
+        handleAnswerUpdated(mockEvent);
+      }
     }
 
     if (aggregators.length !== 2 || aggregatorPrices.length !== 2) {
@@ -862,7 +934,38 @@ function handleNewPoolTokens(pool: Pool, tokens: Bytes[]): void {
     if (!assetManager) continue;
 
     createPoolTokenEntity(pool, tokensAddresses[i], i, assetManager);
+
+    // Ensure the token has price data initialized
+    let token = getToken(tokensAddresses[i]);
+    let tokenLatestFXPrice = token.latestFXPrice;
+    let tokenLatestUSDPrice = token.latestUSDPrice;
+
+    // Only initialize if the token doesn't have prices yet
+    if (!tokenLatestFXPrice || !tokenLatestUSDPrice) {
+      if (!token.latestUSDPriceTimestamp) {
+        let createTime = pool.createTime;
+        if (!createTime) {
+          log.warning('Pool create time not found for pool with id {}', [pool.id]);
+        } else {
+          token.latestUSDPriceTimestamp = BigInt.fromI32(createTime);
+        }
+      }
+
+      // For stable tokens (e.g., USDC, DAI), set price to 1
+      if (isUSDStable(tokensAddresses[i])) {
+        token.latestUSDPrice = ONE_BD;
+      } else {
+        // For new non-stable tokens, initialize with a zero price
+        // The real price will be set when initializeTokenPrices is called
+        token.latestUSDPrice = ZERO_BD;
+      }
+
+      token.save();
+    }
   }
+
+  // After all tokens have been processed, try to derive prices based on pool composition
+  initializeTokenPrices(pool);
 }
 
 // find the quote token in an FXPool
