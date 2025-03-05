@@ -450,6 +450,25 @@ function _findPricingAsset(pool: Pool): Address | null {
   return null;
 }
 
+function _findAssetWithUSDPrice(pool: Pool): Address | null {
+  let tokensList: Bytes[] = pool.tokensList;
+  if (tokensList.length < 2) return null;
+  for (let i = 0; i < tokensList.length; i++) {
+    let tokenString = tokensList[i].toHexString();
+    const token = Token.load(tokenString);
+    if (!token) continue;
+
+    let latestUSDPrice = token.latestUSDPrice;
+    if (!latestUSDPrice) {
+      continue;
+    }
+
+    return Address.fromString(tokenString);
+  }
+
+  return null;
+}
+
 // Initialize prices for tokens in a newly created pool
 export function initializeTokenPrices(pool: Pool): void {
   let tokensList: Bytes[] = pool.tokensList;
@@ -462,7 +481,13 @@ export function initializeTokenPrices(pool: Pool): void {
   let pricingAsset: Address | null = _findPricingAsset(pool);
   // If we found a pricing asset, use it to derive prices for other tokens
   if (!pricingAsset) {
-    return;
+    // if there is no pricing asset, see if there is another token in the
+    // pool that has a price in USD (determined from the composition / swaps of another pool)
+    pricingAsset = _findAssetWithUSDPrice(pool);
+
+    if (!pricingAsset) {
+      return;
+    }
   }
   // Get the pricing asset's pool token to access its balance
   let pricingAssetPoolToken = loadPoolToken(pool.id, pricingAsset);
