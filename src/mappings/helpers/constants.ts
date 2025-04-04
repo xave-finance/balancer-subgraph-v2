@@ -39,6 +39,7 @@ class AddressByNetwork {
   public berachain: string;
   public taikoheklatestnet: string;
   public taiko: string;
+  public berachainbepolia: string;
 }
 
 let network: string = dataSource.network();
@@ -54,6 +55,7 @@ let vaultAddressByNetwork: AddressByNetwork = {
   berachain: '0xBE09E71BDc7b8a50A05F7291920590505e3C7744',
   taikoheklatestnet: '0xfbBf11Ae3E8A4b6D9C866B3f16741D1641ccc4d5',
   taiko: '0x3251e99cEf4b9bA03a6434B767aa5Ad11ca6cc31',
+  berachainbepolia: '0xf20Adc6013c2bCd4e09e44b2f0D27c49E121e9b9',
 };
 
 function forNetwork(addressByNetwork: AddressByNetwork, network: string): Address {
@@ -69,8 +71,8 @@ function forNetwork(addressByNetwork: AddressByNetwork, network: string): Addres
     return Address.fromString(addressByNetwork.berachain);
   } else if (network == 'berachainpublictestnet') {
     return Address.fromString(addressByNetwork.berachainpublictestnet);
-  } else if (network == 'berachainbartio') {
-    return Address.fromString(addressByNetwork.berachainbartio);
+  } else if (network == 'berachainbepolia') {
+    return Address.fromString(addressByNetwork.berachainbepolia);
   } else {
     throw new Error('Unsupported network: ' + network);
   }
